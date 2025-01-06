@@ -41,7 +41,6 @@ export function CSVActions({ products, onImport }: CSVActionsProps) {
     reader.onload = (e) => {
       const text = e.target?.result as string;
       const lines = text.split("\n");
-      const headers = lines[0].split(",");
 
       const newProducts: Product[] = lines
         .slice(1) // Skip headers
@@ -53,6 +52,7 @@ export function CSVActions({ products, onImport }: CSVActionsProps) {
             name: values[0].replace(/^"|"$/g, ""), // Remove quotes
             price: parseFloat(values[1]),
             unit: values[2]?.trim() || "100g",
+            cellType: "default" as const,
           };
         });
 
