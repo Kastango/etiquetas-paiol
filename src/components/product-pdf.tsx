@@ -139,12 +139,18 @@ const styles = StyleSheet.create({
   },
   productNameMedium: {
     ...tw("text-white text-lg font-bold text-center leading-5"),
+    textAlign: "center",
+    alignSelf: "center",
   },
   productNameSmall: {
     ...tw("text-white text-base font-bold text-center leading-5"),
+    textAlign: "center",
+    alignSelf: "center",
   },
   productNameLarge: {
     ...tw("text-white text-xl font-bold text-center leading-5"),
+    textAlign: "center",
+    alignSelf: "center",
   },
   productNameLargerLeft: {
     ...tw("text-white text-lg font-bold leading-5"),
@@ -186,7 +192,6 @@ export function ProductPDF({ products }: ProductPDFProps) {
   };
 
   const formatProductName = (name: string, cellType: Product["cellType"]) => {
-    // Split by pipe and remove any whitespace before and after the pipe
     const parts = name.split(/\s*\|\s*/);
     return parts.map((part, index) => (
       <Text key={index} style={getProductNameStyle(part, cellType)}>
