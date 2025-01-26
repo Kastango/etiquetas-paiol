@@ -301,7 +301,7 @@ export function ProductTable() {
                     disabled={newProduct.cellType === "title"}
                     onKeyDown={handleKeyDown}
                     placeholder="R$ 0,00"
-                    className="w-32 text-right"
+                    className="w-72 text-right"
                   />
                   <Select
                     value={newProduct.cellType}
@@ -309,7 +309,7 @@ export function ProductTable() {
                       setNewProduct((prev) => ({ ...prev, cellType: value }))
                     }
                   >
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-28">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

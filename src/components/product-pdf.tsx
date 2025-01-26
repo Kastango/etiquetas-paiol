@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   cell: {
     width: "65mm",
     height: "30mm",
-    padding: "2mm",
+    padding: "4mm",
     paddingBottom: "4mm",
     backgroundColor: "#357267",
     display: "flex",
@@ -117,8 +117,7 @@ const styles = StyleSheet.create({
   largerCell: {
     width: "95mm",
     height: "30mm",
-    padding: "2mm",
-    paddingBottom: "4mm",
+    padding: "4mm",
     backgroundColor: "#357267",
     display: "flex",
     flexDirection: "row",
@@ -129,7 +128,7 @@ const styles = StyleSheet.create({
   titleCell: {
     width: "65mm",
     height: "30mm",
-    padding: "2mm",
+    padding: "4mm",
     paddingBottom: "4mm",
     backgroundColor: "#357267",
     display: "flex",
@@ -198,12 +197,28 @@ export function ProductPDF({ products }: ProductPDFProps) {
 
   const renderDefaultCell = (product: Product) => (
     <View key={product.id} style={styles.cell}>
-      {formatProductName(product.name, product.cellType)}
-      <View style={styles.priceContainer}>
-        <Text style={styles.currency}>R$</Text>
-        <Text style={styles.price}>{formatPrice(product.price)}</Text>
-        <Text style={styles.unit}>{product.unit}</Text>
+      <View
+        style={{
+          flexDirection: "column",
+          ...(product.price === 0 && {
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }),
+        }}
+      >
+        {formatProductName(
+          product.name,
+          product.price === 0 ? "title" : product.cellType
+        )}
       </View>
+      {product.price > 0 && (
+        <View style={styles.priceContainer}>
+          <Text style={styles.currency}>R$</Text>
+          <Text style={styles.price}>{formatPrice(product.price)}</Text>
+          <Text style={styles.unit}>{product.unit}</Text>
+        </View>
+      )}
     </View>
   );
 
@@ -215,14 +230,28 @@ export function ProductPDF({ products }: ProductPDFProps) {
 
   const renderLargerCell = (product: Product) => (
     <View key={product.id} style={styles.largerCell}>
-      <View style={{ flexDirection: "column" }}>
-        {formatProductName(product.name, product.cellType)}
+      <View
+        style={{
+          flexDirection: "column",
+          ...(product.price === 0 && {
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }),
+        }}
+      >
+        {formatProductName(
+          product.name,
+          product.price === 0 ? "title" : product.cellType
+        )}
       </View>
-      <View style={styles.priceContainer}>
-        <Text style={styles.currency}>R$</Text>
-        <Text style={styles.price}>{formatPrice(product.price)}</Text>
-        <Text style={styles.unit}>{product.unit}</Text>
-      </View>
+      {product.price > 0 && (
+        <View style={styles.priceContainer}>
+          <Text style={styles.currency}>R$</Text>
+          <Text style={styles.price}>{formatPrice(product.price)}</Text>
+          <Text style={styles.unit}>{product.unit}</Text>
+        </View>
+      )}
     </View>
   );
 
