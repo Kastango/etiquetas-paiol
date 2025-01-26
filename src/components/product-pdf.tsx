@@ -82,29 +82,29 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#ffffff",
     padding: "5mm",
-    gap: "0.05mm",
+    gap: "0.2mm",
   },
   row: {
     flexDirection: "row",
-    gap: "0.05mm",
+    gap: "0.2mm",
     justifyContent: "flex-start",
   },
   normalRow: {
     flexDirection: "row",
-    gap: "0.05mm",
+    gap: "0.2mm",
     justifyContent: "flex-start",
   },
   column: {
     width: "65mm",
-    gap: "0.05mm",
+    gap: "0.2mm",
   },
   largerColumn: {
     width: "90mm",
-    gap: "0.05mm",
+    gap: "0.2mm",
   },
   cell: {
     width: "65mm",
-    height: "25mm",
+    height: "30mm",
     padding: "2mm",
     paddingBottom: "4mm",
     backgroundColor: "#357267",
@@ -115,8 +115,8 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins",
   },
   largerCell: {
-    width: "90mm",
-    height: "25mm",
+    width: "95mm",
+    height: "30mm",
     padding: "2mm",
     paddingBottom: "4mm",
     backgroundColor: "#357267",
@@ -128,8 +128,9 @@ const styles = StyleSheet.create({
   },
   titleCell: {
     width: "65mm",
-    height: "25mm",
+    height: "30mm",
     padding: "2mm",
+    paddingBottom: "4mm",
     backgroundColor: "#357267",
     display: "flex",
     flexDirection: "column",
@@ -138,29 +139,31 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins",
   },
   productNameMedium: {
-    ...tw("text-white text-sm font-bold text-center leading-5"),
-  },
-  productNameSmall: {
-    ...tw("text-white text-xs font-bold text-center leading-5"),
-  },
-  productNameLarge: {
     ...tw("text-white text-lg font-bold text-center leading-5"),
   },
+  productNameSmall: {
+    ...tw("text-white text-base font-bold text-center leading-5"),
+  },
+  productNameLarge: {
+    ...tw("text-white text-xl font-bold text-center leading-5"),
+  },
   productNameLargerLeft: {
-    ...tw("text-white text-sm  font-bold leading-5"),
+    ...tw("text-white text-lg font-bold leading-5"),
     maxWidth: "60%",
   },
   priceContainer: {
-    ...tw("flex flex-row items-baseline leading-none"),
+    ...tw(
+      "flex flex-row items-baseline leading-none content-center justify-center"
+    ),
   },
   currency: {
-    ...tw("text-white text-sm mr-1 leading-none"),
+    ...tw("text-white text-base mr-1 font-medium leading-none"),
   },
   price: {
-    ...tw("text-white text-md font-bold leading-none"),
+    ...tw("text-white text-2xl font-extrabold leading-none"),
   },
   unit: {
-    ...tw("text-white text-xs ml-1 leading-none"),
+    ...tw("text-white text-base ml-1 font-medium leading-none"),
   },
 });
 

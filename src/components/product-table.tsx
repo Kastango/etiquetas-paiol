@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, FileDown } from "lucide-react";
-import { ProductPDF } from "./product-pdf";
+import { Trash2, Plus } from "lucide-react";
 import { CSVActions } from "./csv-actions";
 import {
   Select,
@@ -22,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { debounce } from "lodash";
 export type CellType = "title" | "default" | "larger";
 
 export interface Product {
@@ -63,12 +62,26 @@ export function ProductTable() {
     cellType: CellType;
   }>({
     name: "",
-    price: "",
+    price: "0,00",
     unit: "100g",
-    cellType: "default",
+    cellType: "title",
   });
 
   const nameInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Add debounced function for storage updates
+  const debouncedStorageUpdate = React.useCallback(
+    debounce((products: Product[]) => {
+      try {
+        localStorage.setItem("products", JSON.stringify(products));
+        // Dispatch storage event for the preview component
+        window.dispatchEvent(new Event("storage"));
+      } catch (e) {
+        console.error("Failed to save products to localStorage:", e);
+      }
+    }, 1000),
+    []
+  );
 
   // Load products from localStorage only once on mount
   React.useEffect(() => {
@@ -100,13 +113,9 @@ export function ProductTable() {
   // Save to localStorage whenever products change
   React.useEffect(() => {
     if (isLoaded) {
-      try {
-        localStorage.setItem("products", JSON.stringify(products));
-      } catch (e) {
-        console.error("Failed to save products to localStorage:", e);
-      }
+      debouncedStorageUpdate(products);
     }
-  }, [products, isLoaded]);
+  }, [products, isLoaded, debouncedStorageUpdate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,44 +176,21 @@ export function ProductTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div>
         <CSVActions
           products={products}
           onImport={(newProducts) => setProducts(newProducts)}
         />
-        <Button
-          disabled={products.length === 0}
-          onClick={async () => {
-            try {
-              const { pdf } = await import("@react-pdf/renderer");
-              const blob = await pdf(
-                <ProductPDF products={products} />
-              ).toBlob();
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = "produtos.pdf";
-              link.click();
-              URL.revokeObjectURL(url);
-            } catch (error) {
-              console.error("Error generating PDF:", error);
-            }
-          }}
-        >
-          <FileDown className="h-4 w-4 mr-2" />
-          Gerar PDF
-        </Button>
       </div>
-
       <div className="border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">ID</TableHead>
               <TableHead>Nome</TableHead>
-              <TableHead className="w-48">Preço</TableHead>
-              <TableHead className="w-32">Unidade</TableHead>
-              <TableHead className="w-32">Tipo</TableHead>
+              <TableHead className="w-32">Preço</TableHead>
+              <TableHead className="w-24">Unidade</TableHead>
+              <TableHead className="w-24">Tipo</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
@@ -242,7 +228,7 @@ export function ProductTable() {
                     }
                     disabled={product.cellType === "title"}
                   >
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -257,7 +243,7 @@ export function ProductTable() {
                       updateProduct(product.id, { cellType: value })
                     }
                   >
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -312,6 +298,7 @@ export function ProductTable() {
                         price: formatInputCurrency(e.target.value),
                       }))
                     }
+                    disabled={newProduct.cellType === "title"}
                     onKeyDown={handleKeyDown}
                     placeholder="R$ 0,00"
                     className="w-32 text-right"
@@ -331,7 +318,12 @@ export function ProductTable() {
                       <SelectItem value="larger">Largo</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button type="submit" size="icon" className="h-10 w-12">
+                  <Button
+                    onClick={handleSubmit}
+                    type="submit"
+                    size="icon"
+                    className="h-10 w-12"
+                  >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </form>
