@@ -33,6 +33,12 @@ NAMES = {
 }
 
 
+# Photos left out of the library, with the reason.
+SKIP = {
+    "flocos com chocolate": "only 419 px wide, blurry at the 555–780 px the posts show it",
+}
+
+
 def plain(text):
     return unicodedata.normalize("NFD", text).encode("ascii", "ignore").decode().lower()
 
@@ -55,6 +61,9 @@ def same_photo(a, b):
 
 photos, seen = [], {}
 for psd_path in sorted(args.psd_dir.glob("*.psd")):
+    if psd_path.stem.lower() in SKIP:
+        print(f"{psd_path.name}: skipped, {SKIP[psd_path.stem.lower()]}")
+        continue
     psd = PSDImage.open(psd_path)
     if psd.size != (1080, 1080):
         continue  # stories and other pieces have no product photo
