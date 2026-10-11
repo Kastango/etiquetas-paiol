@@ -1,0 +1,26 @@
+{
+  "name": "Paiol Produtos Naturais",
+  "source": "Logo extraída do cartão de visitas original, com letras em curvas.",
+  "colors": {
+    "verde": "#347265",
+    "vinho": "#8D313B",
+    "palha": "#F0CDA2",
+    "dourado": "#BFA574",
+    "verdeEscuro": "#243C34",
+    "branco": "#FFFFFF"
+  },
+  "typefaces": {
+    "display": "Fraunces Black 900",
+    "text": "Poppins 400–800"
+  },
+  "clearSpace": "A altura do símbolo em todos os lados.",
+  "minimumSizes": {
+    "horizontal": "140 px / 35 mm",
+    "symbol": "24 px / 8 mm"
+  },
+  "offerFormats": {
+    "feed": "1080 × 1080",
+    "retrato": "1080 × 1350",
+    "story": "1080 × 1920"
+  }
+}

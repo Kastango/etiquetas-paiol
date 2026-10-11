@@ -1,0 +1,145 @@
+[
+  {
+    "name": "Castanha-do-pará",
+    "src": "/products/castanha-do-para.png",
+    "keywords": [
+      "castanha",
+      "para"
+    ]
+  },
+  {
+    "name": "Amêndoas sem casca",
+    "src": "/products/amendoas-sem-casca.png",
+    "keywords": [
+      "amendoas",
+      "casca"
+    ]
+  },
+  {
+    "name": "Amendoim torrado",
+    "src": "/products/amendoim-torrado.png",
+    "keywords": [
+      "amendoim",
+      "torrado"
+    ]
+  },
+  {
+    "name": "Avelã sem casca",
+    "src": "/products/avela-sem-casca.png",
+    "keywords": [
+      "avela",
+      "casca"
+    ]
+  },
+  {
+    "name": "Castanha de caju torrada sem sal",
+    "src": "/products/castanha-de-caju-torrada-sem-sal.png",
+    "keywords": [
+      "caju",
+      "castanha",
+      "sal",
+      "torrada"
+    ]
+  },
+  {
+    "name": "Nozes chilenas quebradas",
+    "src": "/products/nozes-chilenas-quebradas.png",
+    "keywords": [
+      "chilenas",
+      "nozes",
+      "quebradas"
+    ]
+  },
+  {
+    "name": "Chimichurri com pimenta",
+    "src": "/products/chimichurri-com-pimenta.png",
+    "keywords": [
+      "chimichurri",
+      "pimenta"
+    ]
+  },
+  {
+    "name": "Chimichurri sem pimenta",
+    "src": "/products/chimichurri-sem-pimenta.png",
+    "keywords": [
+      "chimichurri",
+      "pimenta"
+    ]
+  },
+  {
+    "name": "Coco em flocos médio",
+    "src": "/products/coco-em-flocos-medio.png",
+    "keywords": [
+      "coco",
+      "em",
+      "flocos",
+      "medio"
+    ]
+  },
+  {
+    "name": "Ameixa sem caroço",
+    "src": "/products/ameixa-sem-caroco.png",
+    "keywords": [
+      "ameixa",
+      "caroco"
+    ]
+  },
+  {
+    "name": "Cereja-maraschino",
+    "src": "/products/cereja-maraschino.png",
+    "keywords": [
+      "cereja",
+      "maraschino"
+    ]
+  },
+  {
+    "name": "Nozes chilenas inteiras",
+    "src": "/products/nozes-chilenas-inteiras.png",
+    "keywords": [
+      "chilenas",
+      "inteiras",
+      "nozes"
+    ]
+  },
+  {
+    "name": "Farinha de chia",
+    "src": "/products/farinha-de-chia.png",
+    "keywords": [
+      "chia",
+      "farinha"
+    ]
+  },
+  {
+    "name": "Flocos com chocolate",
+    "src": "/products/flocos-com-chocolate.png",
+    "keywords": [
+      "chocolate",
+      "flocos"
+    ]
+  },
+  {
+    "name": "Nozes chilenas quebradas (prato)",
+    "src": "/products/nozes-chilenas-quebradas-prato.png",
+    "keywords": [
+      "chilenas",
+      "nozes",
+      "prato",
+      "quebradas"
+    ]
+  },
+  {
+    "name": "Psyllium",
+    "src": "/products/psyllium.png",
+    "keywords": [
+      "psyllium"
+    ]
+  },
+  {
+    "name": "Vinagrete premium",
+    "src": "/products/vinagrete-premium.png",
+    "keywords": [
+      "premium",
+      "vinagrete"
+    ]
+  }
+]

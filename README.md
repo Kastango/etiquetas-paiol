@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Paiol · ferramentas internas
 
-## Getting Started
+Site interno da Paiol Produtos Naturais com três ferramentas:
 
-First, run the development server:
+- **Etiquetas** (`/etiquetas`): lista de produtos com importação e exportação CSV e PDF A4 para imprimir.
+- **Ofertas** (`/ofertas`): posts de oferta para o Instagram em 1:1, 4:5 e 9:16, baixados em PNG.
+- **Marca** (`/marca`): logos em SVG e PNG, cores, fontes, fachada, tom de voz e o kit completo em ZIP.
+
+Os dados ficam no navegador de cada pessoa; não há banco de dados nem login.
+
+Requer Node 24 e pnpm 10 (`corepack enable` usa a versão fixada em `package.json`).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev         # http://localhost:3000
+pnpm test        # CSV e paginação das etiquetas
+pnpm lint
+pnpm typecheck   # TypeScript 7 (tsc nativo)
+pnpm build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Stack: Next.js 16 (Turbopack, React Compiler), React 19.3, Tailwind CSS 4, TypeScript 7.
+O TypeScript 7 ainda não tem API para ferramentas; ESLint e o build do Next usam o pacote
+`typescript` apontado para o TypeScript 6 (`@typescript/typescript6`), como a Microsoft recomenda.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Arquivos da marca
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Os arquivos em `public/brand` e `public/products` são gerados a partir do cartão de
+visitas em PDF e dos PSDs de ofertas originais:
 
-## Learn More
+```bash
+uv run --with pymupdf --with pillow scripts/extract-brand-assets.py --pdf /caminho/paiol-cartaoVisitas-CEmail.pdf
+uv run --with psd-tools --with pillow --with scipy scripts/extract-product-photos.py --psd-dir /caminho/pasta-dos-psds
+```
 
-To learn more about Next.js, take a look at the following resources:
+Depois, a arte e os mockups das placas (sobre as fotos em `scripts/sources/`), que entram
+no ZIP do kit:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+uv run --with pillow --with numpy --with fonttools scripts/make-facade-mockups.py
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Os scripts usam `rsvg-convert` (`brew install librsvg`) para gerar os PNGs.
+Decisões de design e formato dos dados: `docs/design-brief.md`.
