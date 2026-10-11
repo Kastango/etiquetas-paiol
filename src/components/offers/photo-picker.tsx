@@ -11,14 +11,17 @@ import { removeBackground, trim } from "@/lib/cutout";
 import { downloadBlob } from "@/lib/download";
 import { cn, plain, slug } from "@/lib/utils";
 
-/** Stock sites with photos like the library's: one bowl, seen from above, on a plain background. */
+/**
+ * Stock sites with photos like the library's: one bowl, seen from above, on a plain background.
+ * Stock photos are tagged in English, so every search carries "top view".
+ */
 function searches(term: string) {
   const q = (suffix: string) => encodeURIComponent(`${term} ${suffix}`.trim());
   return [
-    { label: "Pexels", href: `https://www.pexels.com/pt-br/procurar/${q("tigela vista de cima")}/` },
-    { label: "Unsplash", href: `https://unsplash.com/pt-br/s/fotografias/${q("tigela")}` },
-    { label: "Freepik", href: `https://br.freepik.com/search?format=search&query=${q("tigela vista superior")}` },
-    { label: "Google Imagens", href: `https://www.google.com/search?tbm=isch&q=${q("tigela vista de cima fundo branco")}` },
+    { label: "Pexels", href: `https://www.pexels.com/pt-br/procurar/${q("tigela top view")}/` },
+    { label: "Unsplash", href: `https://unsplash.com/pt-br/s/fotografias/${q("tigela top view")}` },
+    { label: "Freepik", href: `https://br.freepik.com/search?format=search&query=${q("tigela top view")}` },
+    { label: "Google Imagens", href: `https://www.google.com/search?tbm=isch&q=${q("tigela top view fundo branco")}` },
   ];
 }
 
