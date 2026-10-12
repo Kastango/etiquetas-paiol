@@ -13,10 +13,11 @@
     "display": "Fraunces Black 900",
     "text": "Poppins 400–800"
   },
-  "clearSpace": "A altura do símbolo em todos os lados.",
+  "clearSpace": "A altura do símbolo em todos os lados; no selo, um décimo do diâmetro.",
   "minimumSizes": {
     "horizontal": "140 px / 35 mm",
-    "symbol": "24 px / 8 mm"
+    "symbol": "24 px / 8 mm",
+    "seal": "100 px / 25 mm"
   },
   "offerFormats": {
     "feed": "1080 × 1080",

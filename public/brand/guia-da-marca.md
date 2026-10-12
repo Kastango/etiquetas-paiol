@@ -18,9 +18,14 @@ A logo vem do cartão de visitas: o paiol, o nome Paiol e, na versão empilhada,
   O paiol mantém o desenho original em tons de uma só cor.
 - Branca: sobre fotos, vidro e fundos escuros ou coloridos. Branco sólido, com o
   telhado destacado e porta e janela vazadas.
+- Selo: "Paiol produtos naturais" em volta do paiol, para adesivos, carimbos,
+  embalagens e foto de perfil. O selo com nome traz "Paiol" grande no centro. Cada um
+  em cores, verde (com o círculo de fundo), preto e branco.
 
-Deixe livre, em volta da logo, pelo menos a altura do paiol em cada lado.
-Tamanho mínimo: horizontal 140 px ou 35 mm; símbolo 24 px ou 8 mm.
+Deixe livre, em volta da logo, pelo menos a altura do paiol em cada lado; em volta do
+selo, um décimo do diâmetro.
+Tamanho mínimo: horizontal 140 px ou 35 mm; símbolo 24 px ou 8 mm; selo 100 px ou
+25 mm de diâmetro. Abaixo disso, use o símbolo.
 São recomendações iniciais; confira uma prova em cada processo de impressão.
 
 Sobre branco ou fundo claro, use a colorida. Sobre o verde Paiol, use a versão com

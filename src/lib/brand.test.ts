@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { examples, logos, monoLogos, palette, rgb, store } from "./brand";
+import { examples, logos, monoLogos, monoSeals, palette, rgb, seals, store } from "./brand";
 
 // The skill repeats the brand data so it works on its own in any assistant; these tests keep the copies equal.
 const skill = readFileSync(new URL("../../public/brand/paiol-marca/SKILL.md", import.meta.url), "utf8");
@@ -13,7 +13,7 @@ test("the skill carries every brand colour with its HEX and RGB", () => {
 });
 
 test("the skill names every logo file of the kit", () => {
-  for (const logo of [...logos, ...monoLogos]) assert.ok(skill.includes(`\`${logo.file}\``), logo.file);
+  for (const logo of [...logos, ...monoLogos, ...seals, ...monoSeals]) assert.ok(skill.includes(`\`${logo.file}\``), logo.file);
 });
 
 test("the skill has the store's details and the site's writing examples", () => {

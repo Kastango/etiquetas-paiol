@@ -114,11 +114,16 @@ versão existe em SVG (gráfica, designer, tamanhos grandes) e em PNG com fundo 
 | Símbolo | `paiol-symbol` | Avatar, ícone e espaços pequenos. |
 | Uma cor | `paiol-horizontal-green`, `paiol-horizontal-black`, `paiol-symbol-green`, `paiol-symbol-black` | Impressão só em verde ou em preto: embalagens, notas, recibos. |
 | Branca | `paiol-horizontal-white`, `paiol-symbol-white` | Sobre fotos, vidro e fundos escuros ou coloridos. |
+| Selo | `paiol-seal-color`, `paiol-seal-disc` | "Paiol produtos naturais" em volta do paiol: adesivos, carimbos, embalagens, foto de perfil; a `disc` já vem no círculo verde. |
+| Selo com nome | `paiol-seal-stacked-color`, `paiol-seal-stacked-disc` | Espaços redondos em que o nome aparece grande: potes, tampas, brindes. |
+| Selo em uma cor | `paiol-seal-black`, `paiol-seal-white`, `paiol-seal-stacked-black`, `paiol-seal-stacked-white` | Carimbo e impressão sem cor; o branco sobre fotos e fundos escuros. |
 
 - **Fundo**: sobre branco ou fundo claro, a colorida; sobre verde Paiol, a versão sobre verde; sobre foto, a branca,
   numa área lisa da foto.
-- **Respiro**: em volta da logo, livre, pelo menos a altura do paiol (o desenho do celeiro) em cada lado.
-- **Tamanho mínimo**: horizontal 140 px ou 35 mm de largura; símbolo 24 px ou 8 mm.
+- **Respiro**: em volta da logo, livre, pelo menos a altura do paiol (o desenho do celeiro) em cada lado; em volta do
+  selo, um décimo do diâmetro.
+- **Tamanho mínimo**: horizontal 140 px ou 35 mm de largura; símbolo 24 px ou 8 mm; selo 100 px ou 25 mm de diâmetro.
+  Abaixo disso, o símbolo.
 - **Inteira**: a logo entra como no arquivo, nas cores do arquivo, sem esticar, girar, contornar, sombrear nem separar
   o paiol do nome.
 

@@ -47,6 +47,20 @@ export const monoLogos: Logo[] = [
   { file: "paiol-symbol-green", name: "Símbolo monocromático", use: "Selos e espaços pequenos. Também em preto e branco.", background: "light", ratio: 23.51 / 27.61 },
 ];
 
+/** The name around the barn, for round spaces. */
+export const seals: Logo[] = [
+  { file: "paiol-seal-color", name: "Selo", use: "Adesivos, carimbos, sacolas e embalagens.", background: "light", ratio: 1 },
+  { file: "paiol-seal-disc", name: "Selo verde", use: "Adesivo redondo e foto de perfil. Já vem com o círculo verde.", background: "light", ratio: 1 },
+  { file: "paiol-seal-stacked-color", name: "Selo com nome", use: "Quando o nome precisa aparecer grande: potes, tampas e brindes.", background: "light", ratio: 1 },
+  { file: "paiol-seal-stacked-disc", name: "Selo com nome verde", use: "Adesivo redondo com o nome em destaque.", background: "light", ratio: 1 },
+];
+export const monoSeals: Logo[] = [
+  { file: "paiol-seal-black", name: "Selo preto", use: "Carimbo e impressão sem cor.", background: "light", ratio: 1 },
+  { file: "paiol-seal-white", name: "Selo branco", use: "Sobre fotos e fundos escuros.", background: "green", ratio: 1 },
+  { file: "paiol-seal-stacked-black", name: "Selo com nome preto", use: "Carimbo e impressão sem cor.", background: "light", ratio: 1 },
+  { file: "paiol-seal-stacked-white", name: "Selo com nome branco", use: "Sobre fotos e fundos escuros.", background: "green", ratio: 1 },
+];
+
 /** Store facts shared by captions, the facade and the kit. The card says Centro; Google Maps says Vila Nova,
  * so materials leave the neighbourhood out until the owners confirm it. */
 export const store = {

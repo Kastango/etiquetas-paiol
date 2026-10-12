@@ -1,19 +1,25 @@
 """Rebuild the Paiol logo files and the brand kit from the original vector business card.
 
-uv run --with pymupdf --with pillow scripts/extract-brand-assets.py --pdf /path/to/paiol-cartaoVisitas-CEmail.pdf
+uv run --with pymupdf --with pillow --with numpy --with fonttools scripts/extract-brand-assets.py --pdf /path/to/paiol-cartaoVisitas-CEmail.pdf
 
+The seals set their ring of text in scripts/sources/Nunito-Variable.ttf (OFL), the face of "Produtos naturais" on the card.
 Product photos come from scripts/extract-product-photos.py.
 """
 import argparse
 import copy
 import io
 import json
+import math
 import subprocess
 import re
 import zipfile
 from pathlib import Path
 import xml.etree.ElementTree as ET
+import numpy as np
 import pymupdf
+from fontTools.pens.svgPathPen import SVGPathPen
+from fontTools.ttLib import TTFont
+from fontTools.varLib import instancer
 from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -146,14 +152,96 @@ for name, color, light, mid in [("green", "#347265", "#b8cec9", "#85aaa3"), ("bl
 write("paiol-symbol-white", [reversed_symbol("#ffffff", "symbol")])
 write("paiol-horizontal-white", [reversed_symbol("#ffffff", "horizontal"), group(wordmark, beside, "#ffffff")])
 
+# Seals: the name around the barn, for stickers, stamps and round avatars. Drawn on a 1000-unit square.
+# The text runs all the way round in caps of one height, with letter spacing that closes the circle; the centre
+# sits on its visual weight (between its box centre and its ink centroid) with an even gap to the text.
+SEAL, SEAL_R = 1000, 470
+nunito = instancer.instantiateVariableFont(TTFont(Path(__file__).parent / "sources/Nunito-Variable.ttf"), {"wght": 700})
+nunito_glyphs, nunito_cmap, nunito_cap = nunito.getGlyphSet(), nunito.getBestCmap(), nunito["OS/2"].sCapHeight
+
+def ring(text, repeat, cap, color):
+    """`text` and a dot, `repeat` times clockwise round the circle, the first centred at the top, caps `cap` tall."""
+    k, r, c = cap / nunito_cap, SEAL_R - cap, SEAL / 2
+    middle = r + cap / 2  # spacing is measured at half the cap height
+    items = []
+    for char in f"{text} • ":
+        if char == "•":
+            items.append((None, 0.42 * cap))
+        else:
+            name = nunito_cmap[ord(char)]
+            items.append((name if char != " " else "", nunito["hmtx"][name][0] * k))
+    items *= repeat
+    track = (2 * math.pi * middle - sum(w for _, w in items)) / len(items)
+    g = ET.Element(f"{{{ns}}}g", {"fill": color})
+    at = -(sum(w for _, w in items[:len(text)]) + track * (len(text) - 1)) / 2
+    for name, width in items:
+        angle = math.degrees((at + width / 2) / middle)
+        if name is None:
+            ET.SubElement(g, f"{{{ns}}}circle", {"r": f"{width / 2:.3f}",
+                "transform": f"translate({c} {c}) rotate({angle:.3f}) translate(0 {-middle:.3f})"})
+        elif name:
+            pen = SVGPathPen(nunito_glyphs)
+            nunito_glyphs[name].draw(pen)
+            ET.SubElement(g, f"{{{ns}}}path", {"d": pen.getCommands(),
+                "transform": f"translate({c} {c}) rotate({angle:.3f}) translate({-width / 2:.3f} {-r:.3f}) scale({k:.5f} {-k:.5f})"})
+        at += width + track
+    return g
+
+def centre_at(groups, radius):
+    """The transform that sets card-coordinate groups in the middle of the seal, every inked pixel within `radius`."""
+    alpha = np.asarray(rasterize(svg_bytes(321.118, 207.732, groups), 3211).getchannel("A"), dtype=float)
+    ys, xs = np.nonzero(alpha > 8)
+    weight = alpha[ys, xs]
+    x = ((xs.min() + xs.max()) / 2 + (xs * weight).sum() / weight.sum()) / 2
+    y = ((ys.min() + ys.max()) / 2 + (ys * weight).sum() / weight.sum()) / 2
+    k = radius / np.sqrt((xs - x) ** 2 + (ys - y) ** 2).max() * 10
+    return f"translate({SEAL / 2} {SEAL / 2}) scale({k:.4f}) translate({-x / 10:.3f} {-y / 10:.3f})"
+
+def write_seal(name, parts, disc=None):
+    """Square SVG cut to the circle; `disc` paints a full circle behind and shrinks the seal to 90% inside it."""
+    box = "0 0 1000 1000" if disc else f"{SEAL / 2 - SEAL_R - 2} {SEAL / 2 - SEAL_R - 2} {2 * SEAL_R + 4} {2 * SEAL_R + 4}"
+    svg = ET.Element(f"{{{ns}}}svg", {"viewBox": box, "width": "1000", "height": "1000", "role": "img"})
+    ET.SubElement(svg, f"{{{ns}}}title").text = "Paiol Produtos Naturais"
+    if disc:
+        ET.SubElement(svg, f"{{{ns}}}circle", {"cx": "500", "cy": "500", "r": "500", "fill": disc})
+        inner = ET.SubElement(svg, f"{{{ns}}}g", {"transform": "translate(500 500) scale(0.9) translate(-500 -500)"})
+    else:
+        inner = svg
+    for part in parts:
+        inner.append(part)
+    data = ET.tostring(svg, encoding="utf-8", xml_declaration=True)
+    (out / f"{name}.svg").write_bytes(data)
+    rasterize(data, 1600).save(out / f"{name}.png", optimize=True)
+
+def placed(transform, groups):
+    g = ET.Element(f"{{{ns}}}g", {"transform": transform})
+    for e in groups:
+        g.append(copy.deepcopy(e))
+    return g
+
+# The seal with the name in the centre enlarges the barn 1.5 times over the name and brings it 15% closer.
+lift = 0.15 * (wy0 - sy1)
+over_name = f"translate({(wx0 + wx1) / 2:.3f} {sy1 + lift:.3f}) scale(1.5) translate({-(sx0 + sx1) / 2:.3f} {-sy1:.3f})"
+inks = [("color", "#347265", None, lambda: group(symbol, ""), "#347265"),
+        ("disc", "#f0cda2", "#347265", lambda: group(symbol, ""), "#ffffff"),
+        ("black", "#000000", None, lambda: mono_symbol("#000000", "#a6a6a6", "#666666"), "#000000"),
+        ("white", "#ffffff", None, lambda: reversed_symbol("#ffffff", "seal"), "#ffffff")]
+for name, text, repeat, cap, gap, centre in [
+        ("paiol-seal", "PAIOL PRODUTOS NATURAIS", 2, 52, 105, lambda barn, word: [barn]),
+        ("paiol-seal-stacked", "PRODUTOS NATURAIS", 3, 50, 100, lambda barn, word: [placed(over_name, [barn]), group(wordmark, "", word)])]:
+    # Measured once, on the colour version, so every ink lines up the same.
+    at = centre_at(centre(group(symbol, ""), "#347265"), SEAL_R - cap - gap)
+    for variant, ink, disc, barn, word in inks:
+        write_seal(f"{name}-{variant}", [ring(text, repeat, cap, ink), placed(at, centre(barn(), word))], disc)
+
 icon = Image.open(out / "paiol-symbol.png")
 icon.thumbnail((128, 128))
 icon.save(root / "src/app/favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
 manifest = {"name": "Paiol Produtos Naturais", "source": "Logo extraída do cartão de visitas original, com letras em curvas.",
     "colors": {"verde": "#347265", "vinho": "#8D313B", "palha": "#F0CDA2", "dourado": "#BFA574", "verdeEscuro": "#243C34", "branco": "#FFFFFF"},
     "typefaces": {"display": "Fraunces Black 900", "text": "Poppins 400–800"},
-    "clearSpace": "A altura do símbolo em todos os lados.",
-    "minimumSizes": {"horizontal": "140 px / 35 mm", "symbol": "24 px / 8 mm"},
+    "clearSpace": "A altura do símbolo em todos os lados; no selo, um décimo do diâmetro.",
+    "minimumSizes": {"horizontal": "140 px / 35 mm", "symbol": "24 px / 8 mm", "seal": "100 px / 25 mm"},
     "offerFormats": {"feed": "1080 × 1080", "retrato": "1080 × 1350", "story": "1080 × 1920"}}
 (out / "paiol-brand.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
 with zipfile.ZipFile(out / "paiol-brand-kit.zip", "w", zipfile.ZIP_DEFLATED) as archive:

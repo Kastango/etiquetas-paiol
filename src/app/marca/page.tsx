@@ -8,7 +8,7 @@ import { CopySwatch } from "@/components/brand/copy-swatch";
 import { CopyText } from "@/components/brand/copy-text";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { boxSign, checklist, contrast, examples, facade, logos, monoLogos, pairs, palette, pillars, store, vocabulary, voice, type Logo } from "@/lib/brand";
+import { boxSign, checklist, contrast, examples, facade, logos, monoLogos, monoSeals, pairs, palette, pillars, seals, store, vocabulary, voice, type Logo } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Marca" };
@@ -37,11 +37,13 @@ function Section({ id, title, intro, children }: { id: string; title: string; in
 }
 
 function LogoCard({ logo }: { logo: Logo }) {
+  // Seals are round and carry small text: they get the card's full height.
+  const height = logo.ratio === 1 ? 128 : 96;
   return (
     <li className="flex flex-col overflow-hidden rounded-lg border bg-card">
-      <div className={cn("flex h-44 items-center justify-center p-8", logo.background === "green" ? "bg-paiol-verde" : "bg-white")}>
-        <Image src={`/brand/${logo.file}.svg`} alt={logo.name} width={Math.round(96 * logo.ratio)} height={96}
-          className="max-h-24 w-auto max-w-full" />
+      <div className={cn("flex h-44 items-center justify-center", height === 128 ? "p-6" : "p-8", logo.background === "green" ? "bg-paiol-verde" : "bg-white")}>
+        <Image src={`/brand/${logo.file}.svg`} alt={logo.name} width={Math.round(height * logo.ratio)} height={height}
+          className="w-auto max-w-full" style={{ maxHeight: height }} />
       </div>
       <div className="flex flex-1 flex-col gap-3 border-t p-4">
         <div>
@@ -174,6 +176,12 @@ export default function BrandPage() {
           Quando não dá para usar as cores da marca. Verde e preta mantêm o desenho original em tons de uma só cor. A branca é sólida, com o telhado destacado e porta e janela vazadas, para funcionar sobre fotos.
         </p>
         <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{monoLogos.map(logo => <LogoCard key={logo.file} logo={logo} />)}</ul>
+        <h3 className="mt-10 font-semibold">Selo</h3>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          O nome em volta do paiol, para espaços redondos. As letras do anel são as de “Produtos naturais” no cartão. Também em preto, para carimbo, e em branco, para fotos.
+        </p>
+        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{seals.map(logo => <LogoCard key={logo.file} logo={logo} />)}</ul>
+        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{monoSeals.map(logo => <LogoCard key={logo.file} logo={logo} />)}</ul>
       </Section>
 
       <Section id="uso" title="Uso da logo" intro="Regras para a logo continuar legível e igual em todos os lugares.">
@@ -181,7 +189,7 @@ export default function BrandPage() {
           <div className="rounded-lg border bg-card p-6">
             <h3 className="font-semibold">Área de respiro</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Deixe livre, em volta da logo, pelo menos a altura do paiol em cada lado. Nada de texto, borda ou imagem nessa área.
+              Deixe livre, em volta da logo, pelo menos a altura do paiol em cada lado. Nada de texto, borda ou imagem nessa área. No selo, deixe livre um décimo do diâmetro.
             </p>
             <div className="mt-6 flex justify-center bg-white py-6">
               <ClearSpace />
@@ -189,17 +197,22 @@ export default function BrandPage() {
           </div>
           <div className="rounded-lg border bg-card p-6">
             <h3 className="font-semibold">Tamanho mínimo</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Abaixo disso o nome perde a leitura. Na dúvida, imprima uma prova.</p>
-            <dl className="mt-6 grid grid-cols-2 gap-6">
+            <p className="mt-1 text-sm text-muted-foreground">Abaixo disso o nome perde a leitura; use o símbolo. Na dúvida, imprima uma prova.</p>
+            <dl className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-3">
               <div>
-                <div className="flex h-16 items-end"><Image src="/brand/paiol-horizontal-color.svg" alt="" width={140} height={49} className="h-[49px] w-auto" /></div>
+                <div className="flex h-[100px] items-end"><Image src="/brand/paiol-horizontal-color.svg" alt="" width={140} height={49} className="h-[49px] w-auto" /></div>
                 <dt className="mt-3 text-sm font-medium">Horizontal</dt>
                 <dd className="font-mono text-sm text-muted-foreground">140 px · 35 mm</dd>
               </div>
               <div>
-                <div className="flex h-16 items-end"><Image src="/brand/paiol-symbol.svg" alt="" width={24} height={28} className="h-7 w-auto" /></div>
+                <div className="flex h-[100px] items-end"><Image src="/brand/paiol-symbol.svg" alt="" width={24} height={28} className="h-7 w-auto" /></div>
                 <dt className="mt-3 text-sm font-medium">Símbolo</dt>
                 <dd className="font-mono text-sm text-muted-foreground">24 px · 8 mm</dd>
+              </div>
+              <div>
+                <div className="flex h-[100px] items-end"><Image src="/brand/paiol-seal-color.svg" alt="" width={100} height={100} className="size-[100px]" /></div>
+                <dt className="mt-3 text-sm font-medium">Selo</dt>
+                <dd className="font-mono text-sm text-muted-foreground">100 px · 25 mm</dd>
               </div>
             </dl>
           </div>
