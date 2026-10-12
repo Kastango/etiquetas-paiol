@@ -17,7 +17,11 @@ a prévia vem antes do formulário. Campos de 16 px no celular para o iOS não a
 A logo dos cartões permanece. Símbolo, nome (Fraunces 9pt Black em curvas) e
 "Produtos naturais" (Nunito Bold em curvas) são extraídos do PDF vetorial; a
 versão empilhada mantém as posições do cartão. A horizontal põe o nome ao lado do
-paiol, com altura de 60% do símbolo e a mesma base. A versão monocromática mantém
+paiol, com altura de 60% do símbolo, centrado no centro óptico do paiol (o centroide
+do desenho, abaixo do centro da caixa, que o cone da torre puxa para cima); escolha do
+usuário em outubro de 2026, antes o nome dividia a base com o paiol. Na versão com
+assinatura, nome e "Produtos naturais" ficam centrados no mesmo ponto, e a assinatura
+divide a base com o paiol. A versão monocromática mantém
 o desenho original em tons de uma cor: telhado, porta e janela a 100%, lateral a 60%,
 frente e torre a 35%. A tentativa com porta e janela vazadas foi recusada no verde.
 A branca é sólida (transparência deixava a foto aparecer através do paiol), com

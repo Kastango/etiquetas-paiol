@@ -35,7 +35,7 @@ export interface Logo { file: string; name: string; use: string; background: "li
 export const logos: Logo[] = [
   { file: "paiol-horizontal-color", name: "Horizontal", use: "Principal. Site, documentos, assinaturas e fundos claros.", background: "light", ratio: 79.21 / 27.61 },
   { file: "paiol-horizontal-reversed", name: "Horizontal sobre verde", use: "Faixas verdes, rodapé dos posts e fachada.", background: "green", ratio: 79.21 / 27.61 },
-  { file: "paiol-horizontal-tagline-color", name: "Horizontal com assinatura", use: "Placas, fachada e materiais em que a loja se apresenta.", background: "light", ratio: 86.31 / 27.61 },
+  { file: "paiol-horizontal-tagline-color", name: "Horizontal com assinatura", use: "Placas, fachada e materiais em que a loja se apresenta.", background: "light", ratio: 81.91 / 27.61 },
   { file: "paiol-stacked-color", name: "Empilhada", use: "Espaços quadrados: sacolas, adesivos e perfil.", background: "light", ratio: 72.28 / 54.98 },
   { file: "paiol-stacked-reversed", name: "Empilhada sobre verde", use: "A versão do cartão de visitas.", background: "green", ratio: 72.28 / 54.98 },
   { file: "paiol-symbol", name: "Símbolo", use: "Avatar, ícone do site e espaços pequenos.", background: "light", ratio: 23.51 / 27.61 },

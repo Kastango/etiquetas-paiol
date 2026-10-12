@@ -124,22 +124,31 @@ def bounds(groups):
     probe = rasterize(svg_bytes(321.118, 207.732, groups), 3211)
     return [v / 10 for v in probe.getchannel("A").getbbox()]
 
+def ink_middle(groups):
+    """Height of the ink's centroid: the drawing's optical middle, below its box's when the top is thin."""
+    alpha = np.asarray(rasterize(svg_bytes(321.118, 207.732, groups), 3211).getchannel("A"), dtype=float)
+    return (alpha.sum(axis=1) * np.arange(alpha.shape[0])).sum() / alpha.sum() / 10
+
 # The card already sets barn, name and tagline in place; stacked lockups keep those positions.
-# The horizontal lockup sets the name beside the barn, cap height at 60% of the barn, sharing its base.
+# Horizontal lockups centre the text on the barn's optical middle: the tower's cone raises its box, not its weight.
+# The name sits beside the barn, cap height at 60% of the barn.
 sx0, sy0, sx1, sy1 = bounds([group(symbol, "")])
 wx0, wy0, wx1, wy1 = bounds([group(wordmark, "")])
+middle = ink_middle([group(symbol, "")])
 k = 0.6 * (sy1 - sy0) / (wy1 - wy0)
-beside = f"translate({sx1 + 0.3 * (sy1 - sy0):.3f} {sy1:.3f}) scale({k:.4f}) translate({-wx0:.3f} {-wy1:.3f})"
+beside = f"translate({sx1 + 0.3 * (sy1 - sy0):.3f} {middle:.3f}) scale({k:.4f}) translate({-wx0:.3f} {-(wy0 + wy1) / 2:.3f})"
 for variant, color, tag in [("color", "#347265", "#347265"), ("reversed", "#ffffff", "#f0cda2")]:
     write(f"paiol-stacked-{variant}", [group(symbol, ""), group(wordmark, "", color), group(tagline, "", tag)])
     write(f"paiol-horizontal-{variant}", [group(symbol, ""), group(wordmark, beside, color)])
-# For signs: name and tagline set to the same width beside the barn, the pair 90% of its height, sharing its base.
+# For signs: name and tagline set to the same width beside the barn, the pair as tall as fits centred on the
+# barn's optical middle, so the tagline shares the barn's base.
 tx0, ty0, tx1, ty1 = bounds([group(tagline, "")])
 wordmark_ratio, tagline_ratio = (wy1 - wy0) / (wx1 - wx0), (ty1 - ty0) / (tx1 - tx0)
-text_width = 0.9 * (sy1 - sy0) / (wordmark_ratio * 1.12 + tagline_ratio)
+pair = 2 * (sy1 - middle)
+text_width = pair / (wordmark_ratio * 1.12 + tagline_ratio)
 left = sx1 + 0.3 * (sy1 - sy0)
 kw, kt = text_width / (wx1 - wx0), text_width / (tx1 - tx0)
-name_top = sy1 - 0.9 * (sy1 - sy0)
+name_top = sy1 - pair
 name_at = f"translate({left:.3f} {name_top:.3f}) scale({kw:.4f}) translate({-wx0:.3f} {-wy0:.3f})"
 tag_at = f"translate({left:.3f} {sy1:.3f}) scale({kt:.4f}) translate({-tx0:.3f} {-ty1:.3f})"
 for variant, color, tag in [("color", "#347265", "#347265"), ("reversed", "#ffffff", "#f0cda2")]:
