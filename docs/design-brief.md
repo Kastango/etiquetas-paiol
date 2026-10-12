@@ -53,7 +53,8 @@ Um renderer Canvas (`src/lib/offer.ts`) desenha a prévia e o PNG nos formatos
 1:1 (1080 × 1080), 4:5 (1080 × 1350) e 9:16 (1080 × 1920). Textos e logo são posicionados
 pelas medidas reais dos glifos; a logo, pelo desenho, descontando a margem de 8% do PNG.
 No feed e no retrato, a logo tem a altura do bloco "Oferta" + validade; no story, tudo é
-centralizado e fica fora dos 250 px do topo e da base, onde o Instagram desenha os controles.
+centralizado: o bloco da faixa verde fica no meio da faixa inteira, para o verde não sobrar embaixo,
+mas termina 150 px acima da base (barra de resposta); nada entra nos 250 px do topo.
 
 A sombra das tigelas copia a dos PSDs: duas sombras projetadas em Multiplicação, luz global
 a 137°, 23% / distância 30 / tamanho 16 e 39% / 77 / 62, ambas com 8% de ruído (o granulado).

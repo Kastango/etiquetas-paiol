@@ -17,8 +17,11 @@ export interface OfferAssets { photo: HTMLImageElement | null; logo: HTMLImageEl
 interface Box { x: number; y: number; w: number; h: number }
 interface Layout {
   width: number; height: number;
-  /** "row": headline and validity left, logo right. "stack": everything centred, logo under the validity. */
-  band: { y: number; contentBottom: number; style: "row" | "stack" };
+  /**
+   * "row": headline and validity left, logo right. "stack": everything centred, logo under the validity.
+   * The block is centred between y and contentBottom, ending no lower than safeBottom.
+   */
+  band: { y: number; contentBottom: number; safeBottom?: number; style: "row" | "stack" };
   photo: Box; text: Box & { align: "left" | "center" };
   nameSize: number; headlineSize: number;
 }
@@ -31,11 +34,12 @@ export const FORMATS: Record<OfferFormat, { label: string; ratio: string; layout
   portrait: { label: "Retrato", ratio: "4:5", layout: {
     width: 1080, height: 1350, photo: { x: 140, y: 60, w: 800, h: 700 }, text: { x: MARGIN, y: 770, w: 920, h: 290, align: "left" },
     band: { y: 1070, contentBottom: 1350, style: "row" }, nameSize: 54, headlineSize: 112 } },
-  // Stories keep content out of the top 250 px and bottom 250 px, where Instagram draws its controls;
-  // the green runs on under the reply bar.
+  // Stories keep content out of the top 250 px, under Instagram's progress bar and profile name. The
+  // band's block is centred in the whole band so the green looks balanced, but ends 150 px above the
+  // bottom, clear of the reply bar on phones that draw it over the story.
   story: { label: "Story", ratio: "9:16", layout: {
-    width: 1080, height: 1920, photo: { x: 150, y: 240, w: 780, h: 700 }, text: { x: MARGIN, y: 955, w: 920, h: 275, align: "center" },
-    band: { y: 1260, contentBottom: 1670, style: "stack" }, nameSize: 60, headlineSize: 128 } },
+    width: 1080, height: 1920, photo: { x: 150, y: 240, w: 780, h: 700 }, text: { x: MARGIN, y: 955, w: 920, h: 300, align: "center" },
+    band: { y: 1300, contentBottom: 1920, safeBottom: 1770, style: "stack" }, nameSize: 60, headlineSize: 128 } },
 };
 
 export const COLORS = { verde: "#347265", vinho: "#8D313B", palha: "#F0CDA2", texto: "#243C34", muted: "#6B7C75", fundoPalha: "#FBF1E4" };
@@ -217,7 +221,7 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
 
   const stack = band.style === "stack";
   const validitySize = Math.round(L.headlineSize * (stack ? 0.24 : 0.22));
-  const logoHeight = stack ? Math.round(L.headlineSize * 0.55) : 0;
+  const logoHeight = stack ? Math.round(L.headlineSize * 0.8) : 0;
   // In a row the logo matches the text block's height, so the headline gets what is left of the width.
   const rowLogo = Math.round(L.headlineSize * 1.05);
   const room = stack ? L.width - MARGIN * 2 : L.width - MARGIN * 2 - logoWidth(rowLogo) - rowLogo * 0.86;
@@ -233,7 +237,7 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
   if (stack) {
     const logoGap = L.headlineSize * 0.45;
     const total = textHeight + logoGap + logoHeight;
-    let top = band.y + (band.contentBottom - band.y - total) / 2;
+    let top = Math.min(band.y + (band.contentBottom - band.y - total) / 2, (band.safeBottom ?? band.contentBottom) - total);
     const centre = L.width / 2;
     ctx.textAlign = "center";
     ctx.fillStyle = "#FFFFFF";
