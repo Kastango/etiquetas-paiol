@@ -39,9 +39,10 @@ function Labels() {
   return (
     <div className="grid gap-6 md:gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(22rem,2fr)]">
       <section aria-label="Lista de produtos" className="min-w-0 space-y-4">
-        <CSVActions products={products} types={types} onImport={setProducts} onClear={() => setProducts([])} />
+        <CSVActions products={products} types={types} onImport={setProducts} onClear={() => setProducts([])}>
+          <LabelTypes types={types} onAdd={addType} onUpdate={updateType} onDelete={deleteType} />
+        </CSVActions>
         <ProductTable products={products} types={types} onChange={setProducts} />
-        <LabelTypes types={types} onAdd={addType} onUpdate={updateType} onDelete={deleteType} />
         <p className="hidden text-sm text-muted-foreground md:block">Use | no nome do produto para escolher onde a linha quebra.</p>
       </section>
       <div className="min-w-0 xl:sticky xl:top-8 xl:h-[calc(100vh-4rem)]">

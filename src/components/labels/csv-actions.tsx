@@ -10,9 +10,9 @@ import { CSV_TEMPLATE, exportProducts, importProducts, type Product } from "@/li
 
 const csv = (text: string) => new Blob([text], { type: "text/csv;charset=utf-8" });
 
-/** The list's file actions; on phones a 2 × 2 grid of buttons. */
-export function CSVActions({ products, types, onImport, onClear }: {
-  products: Product[]; types: LabelType[]; onImport: (products: Product[]) => void; onClear: () => void;
+/** The list's file actions, then `children`; on phones a 2 × 2 grid of buttons. */
+export function CSVActions({ products, types, onImport, onClear, children }: {
+  products: Product[]; types: LabelType[]; onImport: (products: Product[]) => void; onClear: () => void; children?: React.ReactNode;
 }) {
   const input = useRef<HTMLInputElement>(null);
 
@@ -43,8 +43,9 @@ export function CSVActions({ products, types, onImport, onClear }: {
       <Button variant="ghost" onClick={() => downloadBlob(csv(CSV_TEMPLATE), "modelo-produtos.csv")}>
         <FileSpreadsheet /> Baixar modelo
       </Button>
+      {children}
       {products.length > 0 && (
-        <Button variant="ghost" className="text-muted-foreground sm:ml-auto"
+        <Button variant="ghost" className="col-span-2 text-muted-foreground sm:col-span-1 sm:ml-auto"
           onClick={() => window.confirm("Apagar todos os produtos da lista?") && onClear()}>
           <Trash /> Limpar lista
         </Button>

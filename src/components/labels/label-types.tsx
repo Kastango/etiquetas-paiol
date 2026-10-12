@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Tags, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { inputClassName } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { layoutLabel } from "@/lib/label-layout";
@@ -51,8 +51,8 @@ function Preview({ type }: { type: Fields }) {
 }
 
 /** Creates a type, or edits one when `type` is given. */
-function TypeDialog({ type, others, open, onOpenChange, onSave }: {
-  type: LabelType | null; others: LabelType[]; open: boolean; onOpenChange: (open: boolean) => void; onSave: (fields: Fields) => void;
+function TypeForm({ type, others, onCancel, onSave }: {
+  type: LabelType | null; others: LabelType[]; onCancel: () => void; onSave: (fields: Fields) => void;
 }) {
   const [draft, setDraft] = useState<Fields>(type ?? BLANK);
   const [problem, setProblem] = useState<string | null>(null);
@@ -62,7 +62,6 @@ function TypeDialog({ type, others, open, onOpenChange, onSave }: {
     const found = checkType(draft, others);
     if (found) return setProblem(found);
     onSave({ ...draft, name: draft.name.trim() });
-    onOpenChange(false);
   };
   const number = (key: "width" | "height", label: string) => (
     <div className="space-y-2">
@@ -78,103 +77,109 @@ function TypeDialog({ type, others, open, onOpenChange, onSave }: {
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{type ? `Editar “${type.name}”` : "Novo tipo de etiqueta"}</DialogTitle>
-          <DialogDescription>Depois, escolha o tipo de cada produto na coluna Etiqueta da lista.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={submit} noValidate className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="type-name">Nome</Label>
-            <input id="type-name" placeholder="Gôndola, Vitrine, Mini…" className={inputClassName} value={draft.name}
-              onChange={e => change({ name: e.target.value })} autoFocus={!type} />
+    <>
+      <DialogHeader>
+        <DialogTitle>{type ? `Editar “${type.name}”` : "Novo tipo de etiqueta"}</DialogTitle>
+        <DialogDescription>Depois, escolha o tipo de cada produto na coluna Etiqueta da lista.</DialogDescription>
+      </DialogHeader>
+      <form onSubmit={submit} noValidate className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="type-name">Nome</Label>
+          <input id="type-name" placeholder="Gôndola, Vitrine, Mini…" className={inputClassName} value={draft.name}
+            onChange={e => change({ name: e.target.value })} autoFocus={!type} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {number("width", "Largura")}
+          {number("height", "Altura")}
+        </div>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium leading-none">Preço</legend>
+          <div className="grid grid-cols-3 gap-2 pt-2">
+            {PRICE_LAYOUTS.map(layout => (
+              <label key={layout.value} className={cn("flex cursor-pointer items-center justify-center rounded-md border px-2 py-2 text-center text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
+                draft.price === layout.value ? "border-primary bg-primary/10 font-medium text-primary" : "hover:bg-accent")}>
+                <input type="radio" name="type-price" value={layout.value} checked={draft.price === layout.value}
+                  onChange={() => change({ price: layout.value })} className="sr-only" />
+                {layout.label}
+              </label>
+            ))}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {number("width", "Largura")}
-            {number("height", "Altura")}
-          </div>
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium leading-none">Preço</legend>
-            <div className="grid grid-cols-3 gap-2 pt-2">
-              {PRICE_LAYOUTS.map(layout => (
-                <label key={layout.value} className={cn("flex cursor-pointer items-center justify-center rounded-md border px-2 py-2 text-center text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
-                  draft.price === layout.value ? "border-primary bg-primary/10 font-medium text-primary" : "hover:bg-accent")}>
-                  <input type="radio" name="type-price" value={layout.value} checked={draft.price === layout.value}
-                    onChange={() => change({ price: layout.value })} className="sr-only" />
-                  {layout.label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <div className="space-y-2 rounded-md bg-muted/50 p-3">
-            <Preview type={draft} />
-            <p className="text-center text-xs text-muted-foreground">
-              {sizeOk(draft) ? `${draft.width} × ${draft.height} mm · cabem ${fits(draft)} na folha A4` : `Área útil da folha A4: ${SHEET.width} × ${SHEET.height} mm`}
-            </p>
-          </div>
-          {problem && <p role="alert" className="text-sm font-medium text-destructive">{problem}</p>}
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit">{type ? "Salvar" : "Criar tipo"}</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </fieldset>
+        <div className="space-y-2 rounded-md bg-muted/50 p-3">
+          <Preview type={draft} />
+          <p className="text-center text-xs text-muted-foreground">
+            {sizeOk(draft) ? `${draft.width} × ${draft.height} mm · cabem ${fits(draft)} na folha A4` : `Área útil da folha A4: ${SHEET.width} × ${SHEET.height} mm`}
+          </p>
+        </div>
+        {problem && <p role="alert" className="text-sm font-medium text-destructive">{problem}</p>}
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onCancel}>Voltar</Button>
+          <Button type="submit">{type ? "Salvar" : "Criar tipo"}</Button>
+        </DialogFooter>
+      </form>
+    </>
   );
 }
 
-/** The label types: the three of the original sheet, fixed, and the ones created here, edited in a dialog. */
+/** The label types, behind a button: the three of the original sheet, fixed, and the ones created here.
+ * The dialog shows the list, or the form for one type. */
 export function LabelTypes({ types, onAdd, onUpdate, onDelete }: {
   types: LabelType[]; onAdd: (fields: Fields) => void; onUpdate: (type: LabelType) => void; onDelete: (type: LabelType) => void;
 }) {
-  // A new key per opening resets the dialog's fields.
-  const [editing, setEditing] = useState<{ type: LabelType | null; key: number } | null>(null);
-  const open = (type: LabelType | null) => setEditing({ type, key: Date.now() });
+  const [open, setOpen] = useState(false);
+  // The form mounts afresh from the list each time, so its fields start over.
+  const [editing, setEditing] = useState<{ type: LabelType | null } | null>(null);
+  const edit = (type: LabelType | null) => setEditing({ type });
   const custom = types.slice(BUILT_IN_TYPES.length);
 
   return (
-    <section aria-labelledby="types-title" className="rounded-lg border bg-card">
-      <div className="flex items-center justify-between gap-3 px-4 py-3">
-        <h2 id="types-title" className="text-sm font-semibold">
-          Tipos de etiqueta <span className="font-normal text-muted-foreground">· {types.length}</span>
-        </h2>
-        <Button type="button" variant="outline" size="sm" onClick={() => open(null)}><Plus />Novo tipo</Button>
-      </div>
-      <div className="border-t px-4 pb-3 pt-1">
-        <ul className="divide-y">
-          {types.map(type => (
-            <li key={type.id} className="flex min-h-14 items-center gap-3 py-2">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{type.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  <span className="tabular-nums">{type.width} × {type.height} mm</span> · {priceLabel(type.price).toLowerCase()} · {fits(type)}
-                </p>
-              </div>
-              {custom.includes(type) ? (
-                <div className="flex shrink-0 gap-1">
-                  <button type="button" aria-label={`Editar o tipo ${type.name}`} onClick={() => open(type)}
-                    className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
-                    <Pencil className="size-4" />
-                  </button>
-                  <button type="button" aria-label={`Apagar o tipo ${type.name}`} onClick={() => onDelete(type)}
-                    className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-destructive">
-                    <Trash2 className="size-4" />
-                  </button>
-                </div>
-              ) : <span className="shrink-0 text-xs text-muted-foreground">Original</span>}
-            </li>
-          ))}
-        </ul>
-        <p className="pt-2 text-xs text-muted-foreground">
-          Cada linha da folha leva um só tamanho, para cortar reto: os maiores vêm primeiro e cada tamanho segue a ordem da lista.
-        </p>
-      </div>
-      {editing && (
-        <TypeDialog key={editing.key} type={editing.type} open onOpenChange={value => !value && setEditing(null)}
-          others={types.filter(other => other.id !== editing.type?.id)}
-          onSave={fields => (editing.type ? onUpdate({ ...fields, id: editing.type.id }) : onAdd(fields))} />
-      )}
-    </section>
+    <Dialog open={open} onOpenChange={value => { setOpen(value); setEditing(null); }}>
+      <DialogTrigger asChild>
+        <Button variant="ghost"><Tags /> Tipos de etiqueta</Button>
+      </DialogTrigger>
+      <DialogContent>
+        {editing ? (
+          <TypeForm type={editing.type} others={types.filter(other => other.id !== editing.type?.id)}
+            onCancel={() => setEditing(null)}
+            onSave={fields => { if (editing.type) onUpdate({ ...fields, id: editing.type.id }); else onAdd(fields); setEditing(null); }} />
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Tipos de etiqueta</DialogTitle>
+              <DialogDescription>
+                Cada produto usa um tipo, escolhido na coluna Etiqueta. Na folha, cada linha leva um só tamanho, para cortar reto: os maiores vêm primeiro.
+              </DialogDescription>
+            </DialogHeader>
+            <ul className="divide-y border-y">
+              {types.map(type => (
+                <li key={type.id} className="flex min-h-14 items-center gap-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{type.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      <span className="tabular-nums">{type.width} × {type.height} mm</span> · {priceLabel(type.price).toLowerCase()} · {fits(type)}
+                    </p>
+                  </div>
+                  {custom.includes(type) ? (
+                    <div className="flex shrink-0 gap-1">
+                      <button type="button" aria-label={`Editar o tipo ${type.name}`} onClick={() => edit(type)}
+                        className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
+                        <Pencil className="size-4" />
+                      </button>
+                      <button type="button" aria-label={`Apagar o tipo ${type.name}`} onClick={() => onDelete(type)}
+                        className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-destructive">
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  ) : <span className="shrink-0 text-xs text-muted-foreground">Original</span>}
+                </li>
+              ))}
+            </ul>
+            <DialogFooter>
+              <Button type="button" onClick={() => edit(null)}><Plus /> Novo tipo</Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
