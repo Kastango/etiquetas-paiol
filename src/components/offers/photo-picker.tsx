@@ -8,22 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { photos } from "@/lib/brand";
 import { removeBackground, trim } from "@/lib/cutout";
+import { stockSearches } from "@/lib/stock-search";
 import { downloadBlob } from "@/lib/download";
 import { cn, plain, slug } from "@/lib/utils";
-
-/**
- * Stock sites with photos like the library's: one bowl, seen from above, on a plain background.
- * Stock photos are tagged in English, so every search carries "top view".
- */
-function searches(term: string) {
-  const q = (suffix: string) => encodeURIComponent(`${term} ${suffix}`.trim());
-  return [
-    { label: "Pexels", href: `https://www.pexels.com/pt-br/procurar/${q("tigela top view")}/` },
-    { label: "Unsplash", href: `https://unsplash.com/pt-br/s/fotografias/${q("tigela top view")}` },
-    { label: "Freepik", href: `https://br.freepik.com/search?format=search&query=${q("tigela top view")}` },
-    { label: "Google Imagens", href: `https://www.google.com/search?tbm=isch&q=${q("tigela top view fundo branco")}` },
-  ];
-}
 
 type Cutout = { status: "idle" } | { status: "working"; progress: number | null };
 
@@ -36,7 +23,7 @@ export function PhotoPicker({ productName, value, onChange }: { productName: str
 
   const words = plain(query).split(/\s+/).filter(Boolean);
   const found = photos.filter(photo => words.every(word => plain(photo.name).includes(word)));
-  const term = (query || productName).replace(/\s*\|\s*/g, " ").trim();
+  const stock = stockSearches((query || productName).replace(/\s*\|\s*/g, " "));
 
   const choose = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -101,9 +88,9 @@ export function PhotoPicker({ productName, value, onChange }: { productName: str
       </div>
 
       <div className="space-y-1.5">
-        <p className="text-sm font-medium">Buscar fotos parecidas{term ? ` com “${term}”` : ""}</p>
+        <p className="text-sm font-medium">Buscar fotos parecidas{stock.term ? ` com “${stock.term}”` : ""}</p>
         <ul className="flex flex-wrap gap-2">
-          {searches(term).map(site => (
+          {stock.sites.map(site => (
             <li key={site.label}>
               <a href={site.href} target="_blank" rel="noreferrer"
                 className="inline-flex items-center gap-1 rounded-md border bg-card px-2.5 py-1 text-sm hover:border-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
@@ -113,7 +100,7 @@ export function PhotoPicker({ productName, value, onChange }: { productName: str
           ))}
         </ul>
         <p className="text-xs text-muted-foreground">
-          Procure a tigela inteira, vista de cima, com fundo liso e pelo menos 1000 px. Pexels e Unsplash podem ser usadas em
+          Os bancos de imagens são em inglês, por isso a busca vai traduzida. Procure a tigela inteira, vista de cima, com fundo liso e pelo menos 1000 px. Pexels e Unsplash podem ser usadas em
           posts da loja; no Freepik e no Google, confira a licença de cada foto.
         </p>
       </div>

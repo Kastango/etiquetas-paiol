@@ -64,6 +64,9 @@ Fotos: `public/products/index.json`, gerado de todos os PSDs por
 fundo removido no navegador por ormbg (Apache-2.0) com Transformers.js num Web Worker: WebGPU em
 fp16, ou WASM em 8 bits; o modelo vem do Hugging Face na primeira vez e fica no cache. Depois do
 modelo, o recorte mantém só o maior objeto, preenche o que ele envolve e corta as margens.
+Os links para Pexels, Unsplash, Freepik e Google buscam em inglês ("walnuts bowl top view"):
+`src/lib/stock-search.ts` traduz o nome com um glossário de produtos naturais; produto novo que a
+loja passe a vender entra no glossário. Nome sem nenhuma palavra conhecida é buscado como digitado.
 
 ## Manutenção
 
