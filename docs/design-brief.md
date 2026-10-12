@@ -68,6 +68,16 @@ No feed e no retrato, a logo tem a altura do bloco "Oferta" + validade; no story
 centralizado: o bloco da faixa verde fica no meio da faixa inteira, para o verde não sobrar embaixo,
 mas termina 150 px acima da base (barra de resposta); nada entra nos 250 px do topo.
 
+Tema Padrão ou Natal (`src/lib/themes.ts`). O de Natal segue os posts de dezembro de 2022 (PSDs
+"amendoas sem casca" e "storie natal paiol"): faixa vermelha, a chamada "Oferta | *especial* | de
+Natal" com a palavra entre asteriscos em amarelo e, no story, o cordão de luzes daquele PSD no canto
+de baixo. Mudanças em relação ao PSD: a chamada fica em Fraunces, como no tema padrão, e não em Poppins
+itálico; o vermelho é #D9363C, um pouco mais fundo que o #EF4C4F do PSD, para o texto branco da
+validade ter 4,5:1; a logo sobre vermelho é a branca, como o guia pede em fundos coloridos. Escolher
+Natal leva a validade para 24 de dezembro, como em 2022. Em qualquer tema, `|` quebra a linha da
+chamada e `*palavra*` a destaca (palha no padrão); a chamada tem até três linhas, do tamanho que
+couber na faixa.
+
 A validade é uma data (padrão: uma semana a partir de hoje, "Válida até 18 de outubro.") ou
 "Válida enquanto durarem os estoques."; o post e a legenda escrevem o texto a partir dessa escolha
 (`validityText`). Um rascunho salvo com data já passada volta para daqui a uma semana.
@@ -95,10 +105,14 @@ horário da loja. O renderer Canvas (`src/lib/hours.ts`) desenha numa largura de
 A4 (2480 × 3508, 300 dpi, também em PDF de uma página), feed 4:5 e story 9:16, este com a logo abaixo
 dos 250 px do topo e o WhatsApp acima dos 150 px de baixo. As linhas ficam centradas entre o fio e o
 WhatsApp; se não cabem, o espaço entre elas fecha até 60% antes de as letras diminuírem. O texto
-para copiar segue o tom da marca e termina com o endereço da loja.
+para copiar segue o tom da marca e termina com o endereço da loja. No tema de Natal, faixa, fio,
+ícone e aviso ficam no vermelho do tema, a logo é a branca e o cordão de luzes desce do canto de cima;
+título e linhas viram um exemplo de fim de ano (24, 25 e 31 de dezembro e 1º de janeiro) só se ainda
+estiverem no texto padrão, e voltam do mesmo jeito: nada digitado se perde ao trocar de tema.
 
 ## Manutenção
 
 - Logos e kit: `scripts/extract-brand-assets.py` (requer `rsvg-convert`).
 - Fotos de produto: `scripts/extract-product-photos.py`.
+- Luzes de Natal: `scripts/extract-christmas-lights.py`, do PSD "storie natal paiol".
 - Testes de CSV e paginação: `pnpm test`.

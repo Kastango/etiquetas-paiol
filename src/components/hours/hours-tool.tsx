@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { useCopy } from "@/lib/clipboard";
 import { downloadBlob } from "@/lib/download";
 import { poppins } from "@/lib/fonts";
-import { HOURS_FORMATS, defaultHours, drawHours, hoursText, type Hours, type HoursAssets, type HoursFormat, type HoursRow } from "@/lib/hours";
+import { HOURS_FORMATS, defaultHours, drawHours, hoursText, withTheme, type Hours, type HoursAssets, type HoursFormat, type HoursRow } from "@/lib/hours";
+import { THEMES, type Theme } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 
 const DRAFT_KEY = "hours-draft";
@@ -56,14 +57,15 @@ function HoursEditor() {
 
   useEffect(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(hours)), [hours]);
 
+  const theme = THEMES[hours.theme];
   useEffect(() => {
-    Promise.all([
-      ...[400, 500, 600].map(w => document.fonts.load(`${w} 40px ${poppins.style.fontFamily}`, "Horário Sábado 8h30 Áá")),
-      loadImage("/brand/paiol-horizontal-reversed.png"),
-    ])
-      .then(loaded => setAssets({ logo: loaded.at(-1) as HTMLImageElement, sans: poppins.style.fontFamily }))
+    let cancelled = false;
+    const fonts = Promise.all([400, 500, 600].map(w => document.fonts.load(`${w} 40px ${poppins.style.fontFamily}`, "Horário Sábado 8h30 Áá")));
+    Promise.all([fonts, loadImage(theme.logo), theme.lights ? loadImage(theme.lights) : null])
+      .then(([, logo, lights]) => { if (!cancelled) setAssets({ logo, lights, sans: poppins.style.fontFamily }); })
       .catch(() => toast.error("Não foi possível carregar a logo. Recarregue a página."));
-  }, []);
+    return () => { cancelled = true; };
+  }, [theme]);
 
   useEffect(() => {
     const ctx = canvas.current?.getContext("2d");
@@ -99,6 +101,20 @@ function HoursEditor() {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
       <form className="min-w-0 space-y-6" onSubmit={e => e.preventDefault()}>
+        <div className="space-y-1.5">
+          <p id="hours-theme" className="text-sm font-medium leading-none">Tema</p>
+          <div role="radiogroup" aria-labelledby="hours-theme" className="grid grid-cols-2 rounded-lg border bg-card p-1">
+            {(Object.keys(THEMES) as Theme[]).map(key => (
+              <button key={key} type="button" role="radio" aria-checked={hours.theme === key} onClick={() => setHours(h => withTheme(h, key))}
+                className={cn("min-h-9 rounded-md px-2 py-1 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
+                  hours.theme === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+                {THEMES[key].label}
+              </button>
+            ))}
+          </div>
+          {hours.theme === "natal" && <p className="text-xs text-muted-foreground">Os dias de fim de ano são um exemplo: confira com a loja.</p>}
+        </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="hours-title">Título</Label>
           <Input id="hours-title" maxLength={40} value={hours.title} onChange={e => set({ title: e.target.value })} />
@@ -139,7 +155,7 @@ function HoursEditor() {
           <Label htmlFor="hours-note">Aviso</Label>
           <textarea id="hours-note" rows={2} placeholder="Feriado de 2 de novembro: fechado" className={cn(inputClassName, "h-auto resize-none")}
             value={hours.note} onChange={e => set({ note: e.target.value })} />
-          <p className="text-xs text-muted-foreground">Opcional. Aparece em vinho, abaixo dos horários.</p>
+          <p className="text-xs text-muted-foreground">Opcional. Aparece em destaque, abaixo dos horários.</p>
         </div>
 
         <div className="space-y-1.5">

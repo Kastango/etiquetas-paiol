@@ -13,7 +13,8 @@ import { matchPhoto, photos } from "@/lib/brand";
 import { useCopy } from "@/lib/clipboard";
 import { downloadBlob } from "@/lib/download";
 import { fraunces, poppins } from "@/lib/fonts";
-import { FORMATS, caption, drawOffer, inAWeek, isoDate, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
+import { FORMATS, HEADLINES, caption, drawOffer, inAWeek, isoDate, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
+import { THEMES, type Theme } from "@/lib/themes";
 import { loadLabelTypes, typeOf } from "@/lib/label-types";
 import { UNITS, currency, loadProducts, type Product } from "@/lib/products";
 import { cn, slug } from "@/lib/utils";
@@ -22,7 +23,7 @@ import { PhotoPicker } from "./photo-picker";
 const DRAFT_KEY = "offer-draft";
 const example = (): Offer => ({
   name: "Nozes chilenas quebradas", price: 4.79, oldPrice: 5, unit: "100g",
-  headline: "Oferta", until: inAWeek(), background: "white",
+  headline: HEADLINES.padrao, until: inAWeek(), background: "white", theme: "padrao",
 });
 
 function loadImage(src: string) {
@@ -65,6 +66,12 @@ function loadDraft(): Offer {
 }
 
 
+/** Christmas offers ran until 24 December, while that day is still ahead. */
+function christmasEve(today = new Date()) {
+  const eve = `${today.getFullYear()}-12-24`;
+  return isoDate(today) <= eve ? eve : null;
+}
+
 /** ?formato=story opens straight in that format. */
 function requestedFormat(): OfferFormat {
   const requested = new URLSearchParams(window.location.search).get("formato");
@@ -91,16 +98,24 @@ function OfferEditor() {
 
   useEffect(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(offer)), [offer]);
 
-  // Reloads fonts, logo and photo; uploaded photos are object URLs that live only in memory.
+  // Reloads fonts, the theme's logo and lights, and the photo; uploaded photos are object URLs that live only in memory.
+  const theme = THEMES[offer.theme];
   useEffect(() => {
     let cancelled = false;
-    Promise.all([loadFonts(), loadImage("/brand/paiol-horizontal-reversed.png"), loadImage(photoSrc).catch(() => null)])
-      .then(([, logo, photo]) => {
-        if (!cancelled) setAssets({ logo, photo, sans: poppins.style.fontFamily, display: fraunces.style.fontFamily });
+    Promise.all([loadFonts(), loadImage(theme.logo), theme.lights ? loadImage(theme.lights) : null, loadImage(photoSrc).catch(() => null)])
+      .then(([, logo, lights, photo]) => {
+        if (!cancelled) setAssets({ logo, lights, photo, sans: poppins.style.fontFamily, display: fraunces.style.fontFamily });
       })
       .catch(() => toast.error("Não foi possível carregar a logo. Recarregue a página."));
     return () => { cancelled = true; };
-  }, [photoSrc]);
+  }, [photoSrc, theme]);
+
+  /** A headline still at the old theme's default takes the new one's; Christmas offers default to the 24th. */
+  const pickTheme = (next: Theme) => set({
+    theme: next,
+    headline: offer.headline === HEADLINES[offer.theme] ? HEADLINES[next] : offer.headline,
+    until: next === "natal" && offer.until !== null ? (christmasEve() ?? offer.until) : offer.until,
+  });
 
   useEffect(() => {
     const ctx = canvas.current?.getContext("2d");
@@ -140,6 +155,19 @@ function OfferEditor() {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
       <form className="min-w-0 space-y-6" onSubmit={e => e.preventDefault()}>
+        <div className="space-y-1.5">
+          <p id="theme-label" className="text-sm font-medium leading-none">Tema</p>
+          <div role="radiogroup" aria-labelledby="theme-label" className="grid grid-cols-2 rounded-lg border bg-card p-1">
+            {(Object.keys(THEMES) as Theme[]).map(key => (
+              <button key={key} type="button" role="radio" aria-checked={offer.theme === key} onClick={() => pickTheme(key)}
+                className={cn("min-h-9 rounded-md px-2 py-1 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
+                  offer.theme === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+                {THEMES[key].label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {products.length > 0 && (
           <Field id="product" label="Produto da lista de etiquetas" hint="Preenche nome, preço e unidade. Confira antes de publicar.">
             <Select onValueChange={pickProduct}>
@@ -183,9 +211,9 @@ function OfferEditor() {
         <PhotoPicker productName={offer.name} value={photoSrc} onChange={setPhotoSrc} />
 
         <fieldset className="space-y-4">
-          <legend className="pb-2 font-semibold">Faixa verde</legend>
-          <Field id="headline" label="Chamada" hint="Uma a três palavras: Oferta, Oferta de Natal, Novidade.">
-            <Input id="headline" maxLength={32} value={offer.headline} onChange={e => set({ headline: e.target.value })} />
+          <legend className="pb-2 font-semibold">Faixa {offer.theme === "natal" ? "vermelha" : "verde"}</legend>
+          <Field id="headline" label="Chamada" hint="Curta: Oferta, Novidade. | quebra a linha; *palavra* entre asteriscos fica em destaque.">
+            <Input id="headline" maxLength={40} value={offer.headline} onChange={e => set({ headline: e.target.value })} />
           </Field>
           <Field id="validity" label="Validade" hint={`No post: “${validityText(offer)}”`}>
             <div role="radiogroup" aria-label="Validade" className="grid grid-cols-2 rounded-lg border bg-card p-1">

@@ -50,6 +50,10 @@ O guia corrige o que estas legendas escorregam: "Paiol" com P maiúsculo e conco
   cartão; o selo com nome usa "PRODUTOS NATURAIS •" três vezes em volta do paiol com o nome. Recusados no
   caminho: "Paiol" em negrito no anel e o texto "• PAIOL • PRODUTOS NATURAIS"; o centro encostado no
   anel. O respiro entre o centro e o texto é perto da altura das letras: com mais, o centro some em 40 px.
+- Natal (outubro de 2026): o tema de Natal de ofertas e horários vem dos posts de dezembro de 2022
+  (faixa vermelha, "Oferta especial de Natal" com "especial" em amarelo, cordão de luzes). Ajustado à
+  marca de hoje: chamada em Fraunces, vermelho #D9363C pelo contraste e logo branca sobre o vermelho.
+  Vermelho e amarelo são só de Natal; não entram na paleta.
 - Monocromática verde e preta: tons sólidos do desenho original. A versão com porta e janela
   vazadas e frestas em todas as faces foi recusada. A branca é sólida, com frestas só no
   telhado e no cone e porta e janela vazadas (transparência deixava a foto aparecer no paiol).

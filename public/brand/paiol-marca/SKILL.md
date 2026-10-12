@@ -140,7 +140,9 @@ As duas são gratuitas (SIL Open Font License) e vêm na pasta `fonts` do brand 
 - **Post de oferta**: sai da página Ofertas do site, que monta a peça e a legenda. Formatos feed 1080 × 1080, retrato
   1080 × 1350 e story 1080 × 1920. Foto do produto à venda, vista de cima, na tigela, sobre fundo branco ou palha claro;
   nome em Poppins Bold verde escuro; preço em Poppins ExtraBold vinho, com a unidade; faixa verde no rodapé com a
-  chamada em Fraunces, a validade e a logo sobre verde. No story, nada nos 250 px do topo.
+  chamada em Fraunces, a validade e a logo sobre verde. No story, nada nos 250 px do topo. No Natal, a faixa fica
+  vermelha (#D9363C) com a logo branca, a chamada "Oferta especial de Natal" com "especial" em amarelo (#FECC55) e,
+  no story, um cordão de luzes no canto.
 - **Etiqueta de balcão**: sai da página Etiquetas do site, em PDF A4. Etiquetas de 65 × 30 mm e 95 × 30 mm, ou de um
   tipo com outro tamanho criado ali; verde Paiol, texto branco em Poppins.
 - **Cartaz de horário**: sai da página Horários do site, em A4 para imprimir (PDF ou PNG), feed 4:5 ou story 9:16,

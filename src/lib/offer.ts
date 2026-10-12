@@ -1,5 +1,6 @@
 import { store } from "./brand";
 import { decimal } from "./products";
+import { THEMES, marked, unmarked, type Theme } from "./themes";
 
 export type OfferFormat = "square" | "portrait" | "story";
 export type OfferBackground = "white" | "palha";
@@ -12,8 +13,13 @@ export interface Offer {
   /** Last day of the offer as YYYY-MM-DD, or null while stocks last. */
   until: string | null;
   background: OfferBackground;
+  theme: Theme;
 }
-export interface OfferAssets { photo: HTMLImageElement | null; logo: HTMLImageElement; sans: string; display: string }
+/** `logo` and `lights` are the theme's. */
+export interface OfferAssets { photo: HTMLImageElement | null; logo: HTMLImageElement; lights: HTMLImageElement | null; sans: string; display: string }
+
+/** The headline each theme starts with. */
+export const HEADLINES: Record<Theme, string> = { padrao: "Oferta", natal: "Oferta | *especial* | de Natal" };
 
 interface Box { x: number; y: number; w: number; h: number }
 interface Layout {
@@ -216,15 +222,31 @@ export function drawOffer(ctx: CanvasRenderingContext2D, offer: Offer, format: O
   drawBand(ctx, offer, L, assets, sans, display);
 }
 
+/** Draws a line word by word, highlighted words in `highlight`; `flags` gives each word's mark, in order. */
+function drawMarked(ctx: CanvasRenderingContext2D, line: string, x: number, y: number, flags: boolean[], colour: string, highlight: string) {
+  const words = line.split(" "), space = ctx.measureText(" ").width;
+  const align = ctx.textAlign;
+  const width = ctx.measureText(line).width;
+  let at = align === "center" ? x - width / 2 : x;
+  ctx.textAlign = "left";
+  for (const word of words) {
+    ctx.fillStyle = flags.shift() ? highlight : colour;
+    ctx.fillText(word, at, y);
+    at += ctx.measureText(word).width + space;
+  }
+  ctx.textAlign = align;
+}
+
 /**
- * The green band. Positions come from the glyphs' measured bounds: the headline's capitals and the
- * validity's baseline delimit the block, and the logo is placed by its drawing, not its image,
- * whose SVG source pads the drawing by 8% of its height on every side.
+ * The band, green or the theme's colour. Positions come from the glyphs' measured bounds: the headline's
+ * capitals and the validity's baseline delimit the block, and the logo is placed by its drawing, not its
+ * image, whose SVG source pads the drawing by 8% of its height on every side. The headline takes up to
+ * three lines, as large as fits the band's height.
  */
 function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets: OfferAssets,
   sans: (weight: number) => (size: number) => string, display: (size: number) => string) {
-  const { band } = L;
-  ctx.fillStyle = COLORS.verde;
+  const { band } = L, theme = THEMES[offer.theme];
+  ctx.fillStyle = theme.band;
   ctx.fillRect(0, band.y, L.width, L.height - band.y);
   const logo = assets.logo, ratio = logo.naturalWidth / logo.naturalHeight;
   const drawLogo = (left: number, top: number, height: number) => {
@@ -234,19 +256,26 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
   const logoWidth = (height: number) => height * 1.16 * ratio - height * 0.16;
 
   const stack = band.style === "stack";
+  // The lights hang into the story's bottom right corner, as in the 2022 Christmas story.
+  if (stack && assets.lights) ctx.drawImage(assets.lights, L.width - assets.lights.naturalWidth, L.height - assets.lights.naturalHeight);
   const validitySize = Math.round(L.headlineSize * (stack ? 0.24 : 0.22));
   const logoHeight = stack ? Math.round(L.headlineSize * 0.8) : 0;
   // In a row the logo matches the text block's height, so the headline gets what is left of the width.
   const rowLogo = Math.round(L.headlineSize * 1.05);
   const room = stack ? L.width - MARGIN * 2 : L.width - MARGIN * 2 - logoWidth(rowLogo) - rowLogo * 0.86;
-  const head = fit(ctx, offer.headline || "Oferta", display, room, L.headlineSize, 52, 2);
-  ctx.font = display(head.size);
-  const headCap = metrics(ctx).cap, headLead = head.size * 0.98;
   const validity = fit(ctx, validityText(offer), sans(500), room, validitySize, Math.round(validitySize * 0.75), 1);
   ctx.font = sans(500)(validity.size);
   const validityCap = metrics(ctx).cap;
+  const height = stack ? (band.safeBottom ?? band.contentBottom) - band.y - L.headlineSize * 1.25 - 60 : band.contentBottom - band.y - 100;
+  const text = unmarked(offer.headline).trim() || "Oferta";
+  let head = fit(ctx, text, display, room, L.headlineSize, 40, 3);
+  const headHeight = (size: number, lines: number) => size * (0.72 + 0.98 * (lines - 1) + 0.3) + validityCap;
+  while (head.size > 40 && headHeight(head.size, head.lines.length) > height) head = fit(ctx, text, display, room, head.size - 2, 40, 3);
+  ctx.font = display(head.size);
+  const headCap = metrics(ctx).cap, headLead = head.size * 0.98;
   const validityGap = head.size * 0.3;
   const textHeight = headCap + (head.lines.length - 1) * headLead + validityGap + validityCap;
+  const flags = marked(offer.headline.trim() || "Oferta").map(word => word.highlight);
 
   if (stack) {
     const logoGap = L.headlineSize * 0.45;
@@ -254,10 +283,10 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
     let top = Math.min(band.y + (band.contentBottom - band.y - total) / 2, (band.safeBottom ?? band.contentBottom) - total);
     const centre = L.width / 2;
     ctx.textAlign = "center";
-    ctx.fillStyle = "#FFFFFF";
     ctx.font = display(head.size);
-    head.lines.forEach((line, i) => ctx.fillText(line, centre, top + headCap + i * headLead));
+    head.lines.forEach((line, i) => drawMarked(ctx, line, centre, top + headCap + i * headLead, flags, "#FFFFFF", theme.highlight));
     top += headCap + (head.lines.length - 1) * headLead;
+    ctx.fillStyle = "#FFFFFF";
     ctx.font = sans(500)(validity.size);
     ctx.fillText(validity.lines[0], centre, top + validityGap + validityCap);
     top += validityGap + validityCap;
@@ -269,13 +298,13 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
   const blockHeight = Math.max(textHeight, rowLogo);
   const top = band.y + (band.contentBottom - band.y - blockHeight) / 2;
   const textTop = top + (blockHeight - textHeight) / 2;
-  ctx.fillStyle = "#FFFFFF";
   ctx.font = display(head.size);
   head.lines.forEach((line, i) => {
     // Optical left edge: the glyph's own side bearing would push the headline right of the margin.
     const bearing = ctx.measureText(line).actualBoundingBoxLeft;
-    ctx.fillText(line, MARGIN + bearing, textTop + headCap + i * headLead);
+    drawMarked(ctx, line, MARGIN + bearing, textTop + headCap + i * headLead, flags, "#FFFFFF", theme.highlight);
   });
+  ctx.fillStyle = "#FFFFFF";
   ctx.font = sans(500)(validity.size);
   ctx.fillText(validity.lines[0], MARGIN, textTop + textHeight);
   drawLogo(L.width - MARGIN - logoWidth(rowLogo), top + (blockHeight - rowLogo) / 2, rowLogo);
@@ -285,8 +314,8 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
 export function caption(offer: Offer) {
   const unit = offer.unit === "100g" ? "a cada 100 g" : offer.unit === "kg" ? "o quilo" : offer.unit;
   const was = offer.oldPrice > offer.price ? ` (antes ${money(offer.oldPrice)})` : "";
-  const headline = offer.headline.trim() || "Oferta";
-  const offerLines = [`${headline}! 🍃`, `${offer.name.replace(/\s*\|\s*/g, " ")} por ${money(offer.price)} ${unit}${was}.`, validityText(offer)];
+  const headline = unmarked(offer.headline).replace(/\s*\|\s*/g, " ").trim() || "Oferta";
+  const offerLines = [`${headline}! ${THEMES[offer.theme].emoji}`, `${offer.name.replace(/\s*\|\s*/g, " ")} por ${money(offer.price)} ${unit}${was}.`, validityText(offer)];
   return [
     ...offerLines.filter(Boolean),
     "",

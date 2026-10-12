@@ -1,5 +1,6 @@
 import { store } from "./brand";
 import { COLORS } from "./offer";
+import { THEMES, type Theme } from "./themes";
 
 export type HoursFormat = "a4" | "portrait" | "story";
 export interface HoursRow { days: string; hours: string }
@@ -10,19 +11,47 @@ export interface Hours {
   /** An optional notice under the hours, such as a holiday. */
   note: string;
   whatsapp: string;
+  theme: Theme;
 }
-export interface HoursAssets { logo: HTMLImageElement; sans: string }
+/** `logo` and `lights` are the theme's. */
+export interface HoursAssets { logo: HTMLImageElement; lights: HTMLImageElement | null; sans: string }
 
-export const defaultHours = (): Hours => ({
-  title: "Horário de funcionamento",
-  rows: [
-    { days: "Segunda a sexta", hours: "Das 8h30 às 12h00\ne 13h30 às 18h30" },
-    { days: "Sábado", hours: "Das 8h30 às 12h30" },
-    { days: "Domingo", hours: "Fechado" },
-  ],
-  note: "",
-  whatsapp: store.whatsapp,
-});
+/** Each theme's starting text: the store's usual hours, or an example of the holidays to fill in. */
+export const SAMPLES: Record<Theme, Pick<Hours, "title" | "rows" | "note">> = {
+  padrao: {
+    title: "Horário de funcionamento",
+    rows: [
+      { days: "Segunda a sexta", hours: "Das 8h30 às 12h00\ne 13h30 às 18h30" },
+      { days: "Sábado", hours: "Das 8h30 às 12h30" },
+      { days: "Domingo", hours: "Fechado" },
+    ],
+    note: "",
+  },
+  natal: {
+    title: "Horário de fim de ano",
+    rows: [
+      { days: "24 de dezembro", hours: "Das 8h30 às 12h00" },
+      { days: "25 de dezembro", hours: "Fechado" },
+      { days: "31 de dezembro", hours: "Das 8h30 às 12h00" },
+      { days: "1º de janeiro", hours: "Fechado" },
+    ],
+    note: "Boas festas!",
+  },
+};
+
+export const defaultHours = (): Hours => ({ ...structuredClone(SAMPLES.padrao), whatsapp: store.whatsapp, theme: "padrao" });
+
+/** Switches the look; text still at the old theme's sample takes the new one's, so nothing typed is lost. */
+export function withTheme(hours: Hours, theme: Theme): Hours {
+  const old = SAMPLES[hours.theme], next = structuredClone(SAMPLES[theme]);
+  const same = (key: keyof typeof old) => JSON.stringify(hours[key]) === JSON.stringify(old[key]);
+  return {
+    ...hours, theme,
+    title: same("title") ? next.title : hours.title,
+    rows: same("rows") ? next.rows : hours.rows,
+    note: same("note") ? next.note : hours.note,
+  };
+}
 
 /**
  * Sizes in px of the file. Every sign is drawn on a 1080-unit width and scaled to the file. Stories keep the
@@ -42,12 +71,13 @@ const lines = (text: string) => text.split("\n").map(line => line.trim()).filter
 const filled = (rows: HoursRow[]) => rows.filter(row => row.days.trim() || row.hours.trim());
 
 /**
- * The sign of the Canva template: green band with the logo, the title over a green rule, each row's days
+ * The sign of the Canva template: a band in the theme's colour with the logo, the title over a green rule, each row's days
  * over its hours, and the WhatsApp at the bottom right. The rows are centred between the rule and the
  * WhatsApp; when they do not fit, the space between them closes up first, then the letters shrink.
  */
 export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: HoursFormat, assets: HoursAssets) {
   const F = HOURS_FORMATS[format], scale = F.width / W, H = F.height / scale;
+  const theme = THEMES[hours.theme], accent = theme.band;
   const font = (weight: number, size: number) => `${weight} ${size}px ${assets.sans}`;
   ctx.canvas.width = F.width;
   ctx.canvas.height = F.height;
@@ -58,8 +88,16 @@ export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: H
 
   // The band is 29% of the width below the safe area; the logo's drawing is 45% of that, centred in it.
   const band = F.safeTop + 313;
-  ctx.fillStyle = COLORS.verde;
+  ctx.fillStyle = theme.band;
   ctx.fillRect(0, 0, W, band);
+  if (assets.lights) {
+    // The story's lights, turned upside down to hang from the top right corner.
+    ctx.save();
+    ctx.translate(W - assets.lights.naturalWidth, assets.lights.naturalHeight);
+    ctx.scale(1, -1);
+    ctx.drawImage(assets.lights, 0, 0);
+    ctx.restore();
+  }
   const logoHeight = 140, image = logoHeight * 1.16; // the logo's files pad the drawing by 8% on each side
   const logoWidth = image * (assets.logo.naturalWidth / assets.logo.naturalHeight);
   ctx.drawImage(assets.logo, (W - logoWidth) / 2, (F.safeTop + band - image) / 2, logoWidth, image);
@@ -75,7 +113,7 @@ export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: H
   const titleY = band + 121;
   ctx.fillText(title, MARGIN, titleY);
   const rule = titleY + 46;
-  ctx.fillStyle = COLORS.verde;
+  ctx.fillStyle = accent;
   ctx.fillRect(MARGIN, rule, width, 5);
 
   // WhatsApp: logo over the number, right-aligned.
@@ -89,7 +127,7 @@ export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: H
     ctx.save();
     ctx.translate(W - MARGIN - icon, top);
     ctx.scale(icon / 24, icon / 24);
-    ctx.fillStyle = COLORS.verde;
+    ctx.fillStyle = accent;
     ctx.fill(new Path2D(WHATSAPP));
     ctx.restore();
     bottom = top;
@@ -134,7 +172,7 @@ export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: H
   if (note.length) {
     if (rows.length) y += gap.note * g * k;
     ctx.font = font(600, size.note * k);
-    ctx.fillStyle = COLORS.vinho;
+    ctx.fillStyle = hours.theme === "natal" ? accent : COLORS.vinho;
     note.forEach((line, j) => ctx.fillText(line, MARGIN, y + j * gap.noteLead * k));
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -146,7 +184,7 @@ export function hoursText(hours: Hours) {
   const rows = filled(hours.rows).map(row => `${row.days.trim()}: ${sentence(lines(row.hours).join(" "))}`);
   const whatsapp = hours.whatsapp.trim();
   return [
-    `${hours.title.trim() || "Horário de funcionamento"} 🍃`,
+    `${hours.title.trim() || "Horário de funcionamento"} ${THEMES[hours.theme].emoji}`,
     ...rows,
     ...lines(hours.note),
     "",
