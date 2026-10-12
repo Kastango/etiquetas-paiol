@@ -8,9 +8,9 @@ sem login; nada é salvo em servidor. As páginas pedem para não ser indexadas.
 
 No computador, menu lateral que recolhe para ícones; a escolha fica no localStorage (`nav`) e é
 aplicada por um script no `<head>` antes da pintura, sem salto. No celular (até 767 px), barra
-superior com o nome da página e barra de abas embaixo (Início, Etiquetas, Ofertas, Marca). Abaixo
-de 768 px a tabela de etiquetas vira cartões, o PDF abre no visualizador do aparelho e, em Ofertas,
-a prévia vem antes do formulário. Campos de 16 px no celular para o iOS não aproximar a tela.
+superior com o nome da página e barra de abas embaixo (Início, Etiquetas, Ofertas, Horários, Marca). Abaixo
+de 768 px a tabela de etiquetas vira cartões, o PDF abre no visualizador do aparelho e, em Ofertas
+e Horários, a prévia vem antes do formulário. Campos de 16 px no celular para o iOS não aproximar a tela.
 
 ## Marca
 
@@ -83,6 +83,19 @@ modelo, o recorte mantém só o maior objeto, preenche o que ele envolve e corta
 Os links para Pexels, Unsplash, Freepik e Google buscam em inglês ("walnuts bowl top view"):
 `src/lib/stock-search.ts` traduz o nome com um glossário de produtos naturais; produto novo que a
 loja passe a vender entra no glossário. Nome sem nenhuma palavra conhecida é buscado como digitado.
+
+## Horários
+
+Cartaz de horário de funcionamento a partir do modelo que a loja usava no Canva: faixa verde com a
+logo sobre verde, o título em maiúsculas sobre um fio verde, cada linha com os dias em Poppins 400 e
+o horário em Poppins 600, e o WhatsApp no canto de baixo, com o ícone do Simple Icons (CC0). O antigo
+"PAIOL" em maiúsculas foi trocado pela logo do kit. Linhas, título, aviso (em vinho, para feriados) e
+WhatsApp são editáveis; o rascunho fica no localStorage (`hours-draft`) e há um botão para voltar ao
+horário da loja. O renderer Canvas (`src/lib/hours.ts`) desenha numa largura de 1080 e escala para
+A4 (2480 × 3508, 300 dpi, também em PDF de uma página), feed 4:5 e story 9:16, este com a logo abaixo
+dos 250 px do topo e o WhatsApp acima dos 150 px de baixo. As linhas ficam centradas entre o fio e o
+WhatsApp; se não cabem, o espaço entre elas fecha até 60% antes de as letras diminuírem. O texto
+para copiar segue o tom da marca e termina com o endereço da loja.
 
 ## Manutenção
 

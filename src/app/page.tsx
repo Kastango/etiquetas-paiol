@@ -8,9 +8,9 @@ export default function Home() {
       <p className="text-sm font-medium text-primary">Paiol Produtos Naturais</p>
       <h1 className="mt-2 font-display text-4xl font-black tracking-tight md:text-5xl">Ferramentas internas</h1>
       <p className="mt-4 max-w-xl text-muted-foreground">
-        Prepare etiquetas e posts de oferta com a identidade da loja, e consulte como usar a marca.
+        Prepare etiquetas, posts de oferta e o cartaz de horários com a identidade da loja, e consulte como usar a marca.
       </p>
-      <ul className="mt-10 grid gap-4 sm:grid-cols-3">
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2">
         {tools.map(({ href, label, icon: Icon, description }) => (
           <li key={href}>
             <Link

@@ -87,7 +87,7 @@ export function AppNav() {
       </aside>
 
       <nav aria-label="Ferramentas" className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden">
-        <ul className="grid grid-cols-4">
+        <ul className="grid auto-cols-fr grid-flow-col">
           {tabs.map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
