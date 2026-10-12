@@ -40,5 +40,12 @@ no ZIP do kit:
 uv run --with pillow --with numpy --with fonttools scripts/make-facade-mockups.py
 ```
 
+As larguras das letras da Poppins que o PDF de etiquetas usa para encaixar os nomes
+(`src/lib/label-widths.ts`) saem das fontes em `public/fonts`; rode de novo só se trocar as fontes:
+
+```bash
+uv run --with fonttools scripts/label-font-widths.py
+```
+
 Os scripts usam `rsvg-convert` (`brew install librsvg`) para gerar os PNGs.
 Decisões de design e formato dos dados: `docs/design-brief.md`.

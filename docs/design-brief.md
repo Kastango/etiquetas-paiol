@@ -43,6 +43,9 @@ blocos copiados do Excel ou do Planilhas são colados a partir da célula em foc
 a linha de novo produto é a última da tabela, com as mesmas colunas.
 Etiquetas de 65 × 30 mm e 95 × 30 mm; as largas vão para o topo, duas por linha,
 como antes; as demais seguem a ordem da lista, três por linha; nove linhas por A4.
+O nome é encaixado antes do react-pdf (`src/lib/label-layout.ts`): o maior corpo em que cabe
+sem quebrar palavras (18 pt nas etiquetas com preço, 20 pt nos títulos, até 10 pt), medido com as
+larguras da Poppins; se nenhum couber, a palavra longa é hifenizada. O nome nunca invade o preço.
 
 ## Ofertas
 
