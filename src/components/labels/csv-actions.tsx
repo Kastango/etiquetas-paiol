@@ -5,12 +5,15 @@ import { FileDown, FileSpreadsheet, FileUp, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { downloadBlob } from "@/lib/download";
+import type { LabelType } from "@/lib/label-types";
 import { CSV_TEMPLATE, exportProducts, importProducts, type Product } from "@/lib/products";
 
 const csv = (text: string) => new Blob([text], { type: "text/csv;charset=utf-8" });
 
 /** The list's file actions; on phones a 2 × 2 grid of buttons. */
-export function CSVActions({ products, onImport, onClear }: { products: Product[]; onImport: (products: Product[]) => void; onClear: () => void }) {
+export function CSVActions({ products, types, onImport, onClear }: {
+  products: Product[]; types: LabelType[]; onImport: (products: Product[]) => void; onClear: () => void;
+}) {
   const input = useRef<HTMLInputElement>(null);
 
   const read = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,7 +21,7 @@ export function CSVActions({ products, onImport, onClear }: { products: Product[
     event.target.value = "";
     if (!file) return;
     try {
-      const imported = importProducts(await file.text());
+      const imported = importProducts(await file.text(), types);
       if (!imported.length) throw new Error("O arquivo não tem produtos.");
       if (products.length && !window.confirm(`Substituir os ${products.length} produtos da lista pelos ${imported.length} do arquivo?`)) return;
       onImport(imported);

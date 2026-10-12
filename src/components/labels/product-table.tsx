@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PriceInput } from "@/components/price-input";
+import { typeOf, type LabelType } from "@/lib/label-types";
 import { PHONE, useMediaQuery } from "@/lib/media";
 import { decimal, pasteGrid, readPrice, type Product } from "@/lib/products";
 import { cn } from "@/lib/utils";
@@ -15,9 +16,11 @@ import { ProductCards } from "./product-cards";
  * The product list as a spreadsheet: arrows, Enter and Tab move between cells, blocks paste from
  * Excel, and the last row (data-row = products.length) adds a product. Phones get ProductCards.
  */
-export function ProductTable({ products, onChange }: { products: Product[]; onChange: Dispatch<SetStateAction<Product[]>> }) {
+export function ProductTable({ products, types, onChange }: { products: Product[]; types: LabelType[]; onChange: Dispatch<SetStateAction<Product[]>> }) {
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const newRow = products.length;
+  /** Title types have no price or unit. */
+  const priced = (item: { cellType: string }) => typeOf(item, types).price !== "none";
 
   /** Cells are found through the DOM from the element that received the event. */
   const focusCell = (from: Element, row: number, col: number) => {
@@ -54,9 +57,9 @@ export function ProductTable({ products, onChange }: { products: Product[]; onCh
 
   /** Adds the new-product row; returns the field to fix when it cannot. */
   const addDraft = (): "name" | "price" | null => {
-    const price = draft.cellType === "title" ? 0 : readPrice(draft.priceText);
+    const price = priced(draft) ? readPrice(draft.priceText) : 0;
     if (!draft.name.trim()) return "name";
-    if (price === null || (!price && draft.cellType !== "title")) {
+    if (price === null || (!price && priced(draft))) {
       toast.error(price === null ? "Não entendi o preço. Use, por exemplo, 4,79." : "Preencha o preço do produto.");
       return "price";
     }
@@ -75,7 +78,7 @@ export function ProductTable({ products, onChange }: { products: Product[]; onCh
 
   const phone = useMediaQuery(PHONE);
   if (phone) {
-    return <ProductCards {...{ products, draft, setDraft, update, remove, swap, addDraft }} />;
+    return <ProductCards {...{ products, types, priced, draft, setDraft, update, remove, swap, addDraft }} />;
   }
 
   const navFor = (row: number, col: number): CellNav => ({
@@ -128,13 +131,13 @@ export function ProductTable({ products, onChange }: { products: Product[]; onCh
     if (target.dataset.row === undefined || !/[\t\n]/.test(text)) return;
     event.preventDefault();
     const row = Number(target.dataset.row);
-    onChange(pasteGrid(products, row, Number(target.dataset.col), text));
+    onChange(pasteGrid(products, row, Number(target.dataset.col), text, types));
     if (row === newRow) setDraft(EMPTY_DRAFT);
     const lines = text.split(/\r?\n/).length;
     toast.success(lines === 1 ? "1 linha colada." : `${lines} linhas coladas.`);
   };
 
-  const title = draft.cellType === "title";
+  const title = !priced(draft);
   return (
     <div>
       <div data-grid onPaste={paste} className="max-h-[min(70vh,48rem)] overflow-auto rounded-lg border bg-card">
@@ -159,7 +162,7 @@ export function ProductTable({ products, onChange }: { products: Product[]; onCh
           </thead>
           <tbody className="[&_td]:border-b [&_td]:border-r [&_td]:p-0 [&_td:last-child]:border-r-0 [&_tr:last-child_td]:border-b-0">
             {products.map((product, row) => {
-              const isTitle = product.cellType === "title";
+              const isTitle = !priced(product);
               return (
                 <tr key={product.id} className="group focus-within:bg-accent/50">
                   <td className="text-center text-xs tabular-nums text-muted-foreground">{row + 1}</td>
@@ -168,7 +171,7 @@ export function ProductTable({ products, onChange }: { products: Product[]; onCh
                     : <PriceInput {...navFor(row, 1)} aria-label="Preço" className={cell} value={product.price} onCommit={price => update(product.id, { price })} />}</td>
                   <td>{isTitle ? <Blank nav={navFor(row, 2)} label="Unidade (título não tem unidade)" />
                     : <UnitCell value={product.unit} onChange={unit => update(product.id, { unit })} nav={navFor(row, 2)} />}</td>
-                  <td><TypeCell value={product.cellType} onChange={cellType => update(product.id, { cellType })} nav={navFor(row, 3)} /></td>
+                  <td><TypeCell value={product.cellType} types={types} onChange={cellType => update(product.id, { cellType })} nav={navFor(row, 3)} /></td>
                   <td className="text-center">
                     <button type="button" tabIndex={-1} aria-label={`Remover ${product.name}`} onClick={() => remove(row)}
                       className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-destructive group-focus-within:opacity-100 group-hover:opacity-100">
@@ -198,7 +201,7 @@ export function ProductTable({ products, onChange }: { products: Product[]; onCh
                 {title ? <Blank nav={navFor(newRow, 2)} label="Unidade (título não tem unidade)" />
                   : <UnitCell value={draft.unit} onChange={unit => setDraft(d => ({ ...d, unit }))} nav={navFor(newRow, 2)} />}
               </td>
-              <td><TypeCell value={draft.cellType} onChange={cellType => setDraft(d => ({ ...d, cellType }))} nav={navFor(newRow, 3)} /></td>
+              <td><TypeCell value={draft.cellType} types={types} onChange={cellType => setDraft(d => ({ ...d, cellType }))} nav={navFor(newRow, 3)} /></td>
               <td className="text-center">
                 <button type="button" aria-label="Adicionar produto" onClick={e => add(e.currentTarget)}
                   className="inline-flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">

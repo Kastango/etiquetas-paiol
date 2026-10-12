@@ -41,11 +41,19 @@ arquivos sem essa coluna, com ponto e vírgula ou com cabeçalhos em português.
 A tabela funciona como planilha: setas, Enter e Tab navegam; o preço aceita "5" ou "4,79";
 blocos copiados do Excel ou do Planilhas são colados a partir da célula em foco (`pasteGrid`);
 a linha de novo produto é a última da tabela, com as mesmas colunas.
-Etiquetas de 65 × 30 mm e 95 × 30 mm; as largas vão para o topo, duas por linha,
-como antes; as demais seguem a ordem da lista, três por linha; nove linhas por A4.
+Tipos de etiqueta (`src/lib/label-types.ts`): Padrão e Título (65 × 30 mm) e Largo (95 × 30 mm),
+fixos, com os ids `default`, `title` e `larger` do CSV original; e os criados pela equipe, com nome,
+largura, altura e preço embaixo, ao lado ou sem preço, salvos no localStorage (`label-types`). O
+`cellType` do produto é o id do tipo; o CSV aceita id ou nome, e um tipo que não existe no navegador
+é um erro que diz qual criar. Apagar um tipo devolve os produtos dele para Padrão.
+Cada linha da folha leva um só tamanho, para cortar reto: do mais largo (depois o mais alto) ao
+menor, como as largas iam para o topo; cada tamanho na ordem da lista; a página quebra pela altura
+(200 × 287 mm úteis), o que dá as nove linhas de 30 mm de antes.
 O nome é encaixado antes do react-pdf (`src/lib/label-layout.ts`): o maior corpo em que cabe
-sem quebrar palavras (18 pt nas etiquetas com preço, 20 pt nos títulos, até 10 pt), medido com as
-larguras da Poppins; se nenhum couber, a palavra longa é hifenizada. O nome nunca invade o preço.
+sem quebrar palavras (18 pt nas etiquetas com preço, 20 pt nos títulos, até 10 pt, a 30 mm de
+altura; corpos, preço e margens acompanham a altura do tipo), medido com as larguras da Poppins;
+se nenhum couber, a palavra longa é hifenizada. O nome nunca invade o preço: preço ao lado que
+deixaria menos de 35% da largura para o nome desce para baixo dele.
 
 ## Ofertas
 

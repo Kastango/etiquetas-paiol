@@ -136,8 +136,8 @@ As duas são gratuitas (SIL Open Font License) e vêm na pasta `fonts` do brand 
   1080 × 1350 e story 1080 × 1920. Foto do produto à venda, vista de cima, na tigela, sobre fundo branco ou palha claro;
   nome em Poppins Bold verde escuro; preço em Poppins ExtraBold vinho, com a unidade; faixa verde no rodapé com a
   chamada em Fraunces, a validade e a logo sobre verde. No story, nada nos 250 px do topo.
-- **Etiqueta de balcão**: sai da página Etiquetas do site, em PDF A4. Etiquetas de 65 × 30 mm e 95 × 30 mm, verde Paiol,
-  texto branco em Poppins.
+- **Etiqueta de balcão**: sai da página Etiquetas do site, em PDF A4. Etiquetas de 65 × 30 mm e 95 × 30 mm, ou de um
+  tipo com outro tamanho criado ali; verde Paiol, texto branco em Poppins.
 - **Placas da fachada**: a arte pronta está na pasta `fachada` do kit (SVG em milímetros). Placa da fachada de
   5,7 × 1,7 m, branca (recomendada) ou verde, com a logo horizontal com assinatura; placa de bandeira quadrada de
   80 × 80 cm com a logo empilhada e o WhatsApp.

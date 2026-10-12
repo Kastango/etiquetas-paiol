@@ -14,6 +14,7 @@ import { useCopy } from "@/lib/clipboard";
 import { downloadBlob } from "@/lib/download";
 import { fraunces, poppins } from "@/lib/fonts";
 import { FORMATS, caption, drawOffer, inAWeek, isoDate, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
+import { loadLabelTypes, typeOf } from "@/lib/label-types";
 import { UNITS, currency, loadProducts, type Product } from "@/lib/products";
 import { cn, slug } from "@/lib/utils";
 import { PhotoPicker } from "./photo-picker";
@@ -78,7 +79,10 @@ function OfferEditor() {
   const [offer, setOffer] = useState<Offer>(loadDraft);
   const [format, setFormat] = useState<OfferFormat>(requestedFormat);
   const [photoSrc, setPhotoSrc] = useState(() => (matchPhoto(offer.name) ?? photos[0]).src);
-  const [products] = useState<Product[]>(() => loadProducts().filter(p => p.cellType !== "title" && p.price > 0));
+  const [products] = useState<Product[]>(() => {
+    const types = loadLabelTypes();
+    return loadProducts().filter(p => typeOf(p, types).price !== "none" && p.price > 0);
+  });
   const [assets, setAssets] = useState<OfferAssets | null>(null);
   const [busy, setBusy] = useState(false);
   const { copied, copy } = useCopy("Não foi possível copiar a legenda.");

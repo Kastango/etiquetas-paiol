@@ -4,13 +4,16 @@ import { useRef, type Dispatch, type SetStateAction } from "react";
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { PriceInput } from "@/components/price-input";
 import { Button } from "@/components/ui/button";
+import type { LabelType } from "@/lib/label-types";
 import type { Product } from "@/lib/products";
 import { cn } from "@/lib/utils";
 import { NameCell, TypeCell, UnitCell, field, fieldTrigger, type Draft } from "./cells";
 
 /** The list on phones: one card per product, large fields and buttons instead of keyboard shortcuts. */
-export function ProductCards({ products, draft, setDraft, update, remove, swap, addDraft }: {
+export function ProductCards({ products, types, priced, draft, setDraft, update, remove, swap, addDraft }: {
   products: Product[];
+  types: LabelType[];
+  priced: (item: { cellType: string }) => boolean;
   draft: Draft;
   setDraft: Dispatch<SetStateAction<Draft>>;
   update: (id: number, changes: Partial<Product>) => void;
@@ -24,13 +27,13 @@ export function ProductCards({ products, draft, setDraft, update, remove, swap, 
     const problem = addDraft();
     form.current?.querySelector<HTMLInputElement>(problem === "price" ? "[inputmode=decimal]" : "input")?.focus();
   };
-  const title = draft.cellType === "title";
+  const title = !priced(draft);
   const icon = "inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent disabled:opacity-30";
   return (
     <div className="space-y-3">
       <ol className="space-y-3">
         {products.map((product, row) => {
-          const isTitle = product.cellType === "title";
+          const isTitle = !priced(product);
           return (
             <li key={product.id} className="space-y-2 rounded-lg border bg-card p-3">
               <div className="flex items-center gap-1">
@@ -43,7 +46,7 @@ export function ProductCards({ products, draft, setDraft, update, remove, swap, 
               <div className={cn("grid gap-2", isTitle ? "grid-cols-1" : "grid-cols-[1fr_5.5rem_7rem]")}>
                 {!isTitle && <PriceInput value={product.price} aria-label="Preço" className={field} onCommit={price => update(product.id, { price })} />}
                 {!isTitle && <UnitCell value={product.unit} className={fieldTrigger} onChange={unit => update(product.id, { unit })} />}
-                <TypeCell value={product.cellType} className={fieldTrigger} onChange={cellType => update(product.id, { cellType })} />
+                <TypeCell value={product.cellType} types={types} className={fieldTrigger} onChange={cellType => update(product.id, { cellType })} />
               </div>
             </li>
           );
@@ -59,7 +62,7 @@ export function ProductCards({ products, draft, setDraft, update, remove, swap, 
               value={draft.priceText} onChange={e => setDraft(d => ({ ...d, priceText: e.target.value }))} />
           )}
           {!title && <UnitCell value={draft.unit} className={fieldTrigger} onChange={unit => setDraft(d => ({ ...d, unit }))} />}
-          <TypeCell value={draft.cellType} className={fieldTrigger} onChange={cellType => setDraft(d => ({ ...d, cellType }))} />
+          <TypeCell value={draft.cellType} types={types} className={fieldTrigger} onChange={cellType => setDraft(d => ({ ...d, cellType }))} />
         </div>
         <Button type="submit" className="h-11 w-full"><Plus /> Adicionar produto</Button>
       </form>

@@ -1,16 +1,10 @@
-export type CellType = "title" | "default" | "larger";
-export interface Product { id: number; name: string; price: number; unit: string; cellType: CellType }
+import { BUILT_IN_TYPES, SHEET, findType, perRow, typeOf, type LabelType } from "./label-types";
+
+/** cellType is the id of the product's label type (src/lib/label-types.ts). */
+export interface Product { id: number; name: string; price: number; unit: string; cellType: string }
 
 export const STORAGE_KEY = "products";
 export const UNITS = ["100g", "kg", "un."];
-export const CELL_TYPES: { value: CellType; label: string }[] = [
-  { value: "title", label: "Título" },
-  { value: "default", label: "Padrão" },
-  { value: "larger", label: "Largo" },
-];
-/** Label widths in mm; rows fill the 200 mm printable width of an A4 sheet. */
-export const CELL_WIDTH: Record<CellType, number> = { title: 65, default: 65, larger: 95 };
-const ROW_WIDTH = 200, ROWS_PER_PAGE = 9;
 
 export const currency = (value: number) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 export const decimal = (value: number) => value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -36,7 +30,7 @@ export function readProducts(value: unknown): Product[] {
       throw new Error(`Confira o nome e o preço do produto na linha ${index + 1}.`);
     }
     return { id: index + 1, name: row.name, price: row.price, unit: typeof row.unit === "string" && row.unit ? row.unit : "100g",
-      cellType: ["title", "larger"].includes(row.cellType) ? row.cellType : "default" };
+      cellType: typeof row.cellType === "string" && row.cellType ? row.cellType : "default" };
   });
 }
 
@@ -54,10 +48,9 @@ export const CSV_TEMPLATE = exportProducts([
 // Column names from the original export (name, price, unit), the cellType extension, and Portuguese headers.
 const COLUMNS: Record<string, string> = { name: "name", nome: "name", produto: "name", price: "price", preco: "price", "preço": "price",
   valor: "price", unit: "unit", unidade: "unit", celltype: "cellType", tipo: "cellType" };
-const TYPE_NAMES: Record<string, CellType> = { title: "title", titulo: "title", "título": "title", default: "default", padrao: "default",
-  "padrão": "default", larger: "larger", largo: "larger" };
 
-export function importProducts(text: string): Product[] {
+/** Reads a CSV; the type column takes a type's id or name, among `types`. */
+export function importProducts(text: string, types: LabelType[] = BUILT_IN_TYPES): Product[] {
   text = text.replace(/^﻿/, "");
   const firstLine = text.split(/\r?\n/)[0];
   const delimiter = firstLine.split(";").length > firstLine.split(",").length ? ";" : ",";
@@ -80,14 +73,16 @@ export function importProducts(text: string): Product[] {
   }
   return readProducts(rows.map((values, index) => {
     const get = (key: string) => values[header.indexOf(key)]?.trim() ?? "";
-    const line = index + 2, rawType = get("cellType").toLowerCase();
-    const cellType = rawType ? TYPE_NAMES[rawType] : "default";
-    if (!cellType) throw new Error(`Tipo inválido na linha ${line}. Use title, default ou larger.`);
-    const name = get("name"), rawPrice = get("price");
+    const line = index + 2, rawType = get("cellType");
+    const type = rawType ? findType(rawType, types) : BUILT_IN_TYPES[0];
+    if (!type) {
+      throw new Error(`O tipo “${rawType}” da linha ${line} não existe aqui. Crie-o em Tipos de etiqueta ou use: ${types.map(t => t.name).join(", ")}.`);
+    }
+    const name = get("name"), rawPrice = get("price"), priced = type.price !== "none";
     if (!name) throw new Error(`Preencha o nome do produto na linha ${line}.`);
-    const price = cellType === "title" ? 0 : parsePrice(rawPrice);
-    if (cellType !== "title" && (!rawPrice || !Number.isFinite(price))) throw new Error(`Confira o preço na linha ${line}.`);
-    return { name, price, unit: get("unit") || "100g", cellType };
+    const price = priced ? parsePrice(rawPrice) : 0;
+    if (priced && (!rawPrice || !Number.isFinite(price))) throw new Error(`Confira o preço na linha ${line}.`);
+    return { name, price, unit: get("unit") || "100g", cellType: type.id };
   }));
 }
 
@@ -96,7 +91,7 @@ export function importProducts(text: string): Product[] {
  * columns are name, price, unit and label type. Rows past the end become new products when the
  * block starts at the name column; cells that cannot be read keep their current value.
  */
-export function pasteGrid(products: Product[], row: number, col: number, text: string): Product[] {
+export function pasteGrid(products: Product[], row: number, col: number, text: string, types: LabelType[] = BUILT_IN_TYPES): Product[] {
   const lines = text.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").map(line => line.split("\t"));
   const next = products.map(p => ({ ...p }));
   let id = products.reduce((max, p) => Math.max(max, p.id), 0);
@@ -115,29 +110,35 @@ export function pasteGrid(products: Product[], row: number, col: number, text: s
         if (Number.isFinite(price) && price >= 0) product.price = Math.round(price * 100) / 100;
       }
       if (column === 2 && value) product.unit = value;
-      if (column === 3 && TYPE_NAMES[value.toLowerCase()]) product.cellType = TYPE_NAMES[value.toLowerCase()];
+      const type = column === 3 && value ? findType(value, types) : null;
+      if (type) product.cellType = type.id;
     });
   });
   return next;
 }
 
 /**
- * As in the original sheet: wide labels first, two per row, then the others three per row,
- * each group in list order. Rows never exceed the printable width; nine rows per A4 page.
+ * Each row holds labels of one size, so the sheet cuts in straight lines: sizes from the widest
+ * (then tallest), as the original sheet put its wide labels first; each size in list order. Rows
+ * fill the printable width and pages break when the next row would not fit their height.
  */
-export function labelPages(products: Product[]): Product[][][] {
-  const rows: Product[][] = [];
-  for (const group of [products.filter(p => p.cellType === "larger"), products.filter(p => p.cellType !== "larger")]) {
-    let row: Product[] = [], width = 0;
-    for (const product of group) {
-      const size = CELL_WIDTH[product.cellType];
-      if (row.length && width + size > ROW_WIDTH) { rows.push(row); row = []; width = 0; }
-      row.push(product); width += size;
-    }
-    if (row.length) rows.push(row);
+export function labelPages(products: Product[], types: LabelType[] = BUILT_IN_TYPES): Product[][][] {
+  const sizes = new Map<string, { type: LabelType; products: Product[] }>();
+  for (const product of products) {
+    const type = typeOf(product, types), key = `${type.width}x${type.height}`;
+    if (sizes.has(key)) sizes.get(key)!.products.push(product);
+    else sizes.set(key, { type, products: [product] });
   }
   const pages: Product[][][] = [];
-  for (let i = 0; i < rows.length; i += ROWS_PER_PAGE) pages.push(rows.slice(i, i + ROWS_PER_PAGE));
+  let page: Product[][] = [], used = 0;
+  for (const { type, products: group } of [...sizes.values()].sort((a, b) => b.type.width - a.type.width || b.type.height - a.type.height)) {
+    for (let i = 0; i < group.length; i += perRow(type)) {
+      if (page.length && used + SHEET.gap + type.height > SHEET.height) { pages.push(page); page = []; }
+      used = page.length ? used + SHEET.gap + type.height : type.height;
+      page.push(group.slice(i, i + perRow(type)));
+    }
+  }
+  if (page.length) pages.push(page);
   return pages;
 }
 

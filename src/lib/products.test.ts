@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { BUILT_IN_TYPES, type LabelType } from "./label-types";
 import { exportProducts, importProducts, labelPages, parsePrice, pasteGrid, readPrice, type Product } from "./products";
 
-const item = (name: string, cellType: Product["cellType"] = "default"): Product => ({ id: 0, name, price: 1, unit: "100g", cellType });
+const item = (name: string, cellType = "default"): Product => ({ id: 0, name, price: 1, unit: "100g", cellType });
 
 test("reads files exported by the original version", () => {
   const products = importProducts('name,price,unit\n"Nozes chilenas quebradas",4.79,100g\n"Amêndoas",5.99,\n');
@@ -54,4 +55,25 @@ test("pasting a price column updates prices only and ignores rows past the end",
 
 test("reads typed prices like a spreadsheet", () => {
   assert.deepEqual(["5", "4,79", "4.79", "R$ 1.234,567", "", "abc", "-2"].map(readPrice), [5, 4.79, 4.79, 1234.57, 0, null, null]);
+});
+
+const custom: LabelType[] = [...BUILT_IN_TYPES, { id: "gondola", name: "Gôndola", width: 95, height: 60, price: "below" },
+  { id: "mini", name: "Mini", width: 40, height: 18, price: "none" }];
+
+test("imports and pastes custom types by name, and names a type that does not exist", () => {
+  const [a, b] = importProducts("nome;preço;tipo\nGranola;3,50;gôndola\nCereais;;Mini\n", custom);
+  assert.deepEqual([a.cellType, b.cellType, b.price], ["gondola", "mini", 0]);
+  assert.throws(() => importProducts("nome;preço;tipo\nGranola;3,50;Gôndola\n"), /“Gôndola” da linha 2 não existe/);
+  assert.equal(pasteGrid([item("A")], 0, 3, "Gôndola", custom)[0].cellType, "gondola");
+});
+
+test("gives each size its own rows, widest then tallest, and breaks pages by height", () => {
+  const products = [item("P1"), item("G1", "gondola"), item("M1", "mini"), item("L1", "larger"), item("G2", "gondola"), item("G3", "gondola"),
+    item("T1", "title"), ...[...Array(5)].map((_, i) => item(`M${i + 2}`, "mini"))];
+  const pages = labelPages(products, custom);
+  assert.deepEqual(pages.flat().map(row => row.map(p => p.name).join(" ")), ["G1 G2", "G3", "L1", "P1 T1", "M1 M2 M3 M4", "M5 M6"]);
+  // 60 + 60 + 30 + 30 + 18 + 18 mm and the gaps fit a sheet; four more rows of Gôndola do not.
+  assert.equal(pages.length, 1);
+  assert.equal(labelPages([...products, ...[...Array(8)].map((_, i) => item(`G${i + 4}`, "gondola"))], custom).length, 2);
+  assert.deepEqual(labelPages([item("X", "apagado")], custom)[0], [[item("X", "apagado")]], "a deleted type prints as Padrão");
 });

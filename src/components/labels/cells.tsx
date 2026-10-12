@@ -2,7 +2,8 @@
 
 import { useRef, type KeyboardEvent } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CELL_TYPES, UNITS, type CellType } from "@/lib/products";
+import type { LabelType } from "@/lib/label-types";
+import { UNITS } from "@/lib/products";
 import { cn } from "@/lib/utils";
 
 /*
@@ -59,12 +60,14 @@ export function UnitCell({ value, onChange, nav, className = trigger }: { value:
   );
 }
 
-export function TypeCell({ value, onChange, nav, className = trigger }: { value: CellType; onChange: (type: CellType) => void; nav?: CellNav; className?: string }) {
+export function TypeCell({ value, types, onChange, nav, className = trigger }: {
+  value: string; types: LabelType[]; onChange: (type: string) => void; nav?: CellNav; className?: string;
+}) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={types.some(type => type.id === value) ? value : "default"} onValueChange={onChange}>
       <SelectTrigger {...nav} aria-label="Tipo de etiqueta" className={className}><SelectValue /></SelectTrigger>
       <SelectContent>
-        {CELL_TYPES.map(type => <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>)}
+        {types.map(type => <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>)}
       </SelectContent>
     </Select>
   );
@@ -74,6 +77,6 @@ export function Kbd({ children }: { children: React.ReactNode }) {
   return <kbd className="rounded border bg-card px-1 font-sans text-[0.7rem] text-foreground">{children}</kbd>;
 }
 
-export const EMPTY_DRAFT = { name: "", priceText: "", unit: "100g", cellType: "default" as CellType };
+export const EMPTY_DRAFT = { name: "", priceText: "", unit: "100g", cellType: "default" };
 
 export type Draft = typeof EMPTY_DRAFT;

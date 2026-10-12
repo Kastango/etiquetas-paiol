@@ -7,10 +7,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { downloadBlob } from "@/lib/download";
 import { PHONE, useMediaQuery } from "@/lib/media";
+import type { LabelType } from "@/lib/label-types";
 import { labelPages, type Product } from "@/lib/products";
 import { LabelPDF } from "./label-pdf";
 
-export default function LabelPreview({ products }: { products: Product[] }) {
+export default function LabelPreview({ products, types }: { products: Product[]; types: LabelType[] }) {
   // Rebuilding the PDF on every keystroke makes typing lag; wait for a pause.
   const [shown, setShown] = useState(products);
   const [busy, setBusy] = useState(false);
@@ -20,7 +21,7 @@ export default function LabelPreview({ products }: { products: Product[] }) {
   }, [products]);
 
   const phone = useMediaQuery(PHONE);
-  const build = () => pdf(<LabelPDF products={products} />).toBlob();
+  const build = () => pdf(<LabelPDF products={products} types={types} />).toBlob();
   const download = async () => {
     setBusy(true);
     try {
@@ -48,7 +49,7 @@ export default function LabelPreview({ products }: { products: Product[] }) {
     }
   };
 
-  const pages = labelPages(products).length;
+  const pages = labelPages(products, types).length;
   const sheets = pages ? `${pages} ${pages === 1 ? "folha" : "folhas"} A4, sem margem de ajuste` : "A4, sem margem de ajuste";
   if (phone) {
     return (
@@ -82,7 +83,7 @@ export default function LabelPreview({ products }: { products: Product[] }) {
       <div className="min-h-[32rem] flex-1 overflow-hidden rounded-lg border bg-muted">
         {shown.length ? (
           <PDFViewer width="100%" height="100%" className="border-none" showToolbar={false}>
-            <LabelPDF products={shown} />
+            <LabelPDF products={shown} types={types} />
           </PDFViewer>
         ) : (
           <div className="flex h-full items-center justify-center p-8 text-center text-sm text-muted-foreground">
