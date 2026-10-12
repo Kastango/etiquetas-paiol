@@ -106,7 +106,7 @@ e o conteúdo deste kit. No Claude, envie o .zip da página Marca do site em Con
 Capacidades → Skills; em outro assistente, cole o texto nas instruções.
 
 Dados da loja: R. Palmas, 1561, Francisco Beltrão · WhatsApp (46) 92001-1470 ·
-@paiolprodutosnaturais · Segunda a sexta, 8h30 às 12h e 13h30 às 18h30; sábado, 8h30 às 12h30.
+@paiolprodutosnaturais · paiolbeltrao@gmail.com · Segunda a sexta, 8h30 às 12h e 13h30 às 18h30; sábado, 8h30 às 12h30.
 
 ## Arquivos
 

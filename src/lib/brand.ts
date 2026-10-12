@@ -67,6 +67,7 @@ export const store = {
   address: "R. Palmas, 1561, Francisco Beltrão",
   whatsapp: "(46) 92001-1470",
   instagram: "@paiolprodutosnaturais",
+  email: "paiolbeltrao@gmail.com",
   hours: ["Segunda a sexta: 8h30 às 12h e 13h30 às 18h30", "Sábado: 8h30 às 12h30"],
 };
 

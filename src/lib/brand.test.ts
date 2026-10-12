@@ -17,7 +17,7 @@ test("the skill names every logo file of the kit", () => {
 });
 
 test("the skill has the store's details and the site's writing examples", () => {
-  for (const fact of [store.address, store.whatsapp, store.instagram, ...store.hours.map(h => h.split(": ")[1])]) {
+  for (const fact of [store.address, store.whatsapp, store.instagram, store.email, ...store.hours.map(h => h.split(": ")[1])]) {
     assert.ok(skill.includes(fact), fact);
   }
   for (const example of examples) assert.ok(skill.includes(example.prefer), example.channel);

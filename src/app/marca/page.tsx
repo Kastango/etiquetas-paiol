@@ -399,6 +399,7 @@ export default function BrandPage() {
             <p className="mt-3 text-muted-foreground">{store.address}</p>
             <p className="text-muted-foreground">WhatsApp {store.whatsapp}</p>
             <p className="text-muted-foreground">{store.instagram}</p>
+            <p className="text-muted-foreground">{store.email}</p>
             <ul className="mt-3 text-muted-foreground">{store.hours.map(h => <li key={h}>{h}</li>)}</ul>
           </div>
         </div>

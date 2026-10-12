@@ -175,6 +175,7 @@ transparente e as duas fontes.
 - Endereço: R. Palmas, 1561, Francisco Beltrão (PR)
 - WhatsApp: (46) 92001-1470
 - Instagram: @paiolprodutosnaturais
+- E-mail: paiolbeltrao@gmail.com
 - Horário: segunda a sexta, 8h30 às 12h e 13h30 às 18h30; sábado, 8h30 às 12h30
 
 ## Antes de entregar
