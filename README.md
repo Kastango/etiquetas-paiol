@@ -4,7 +4,7 @@ Site interno da Paiol Produtos Naturais com três ferramentas:
 
 - **Etiquetas** (`/etiquetas`): lista de produtos com importação e exportação CSV e PDF A4 para imprimir.
 - **Ofertas** (`/ofertas`): posts de oferta para o Instagram em 1:1, 4:5 e 9:16, baixados em PNG.
-- **Marca** (`/marca`): logos em SVG e PNG, cores, fontes, fachada, tom de voz e o kit completo em ZIP.
+- **Marca** (`/marca`): logos em SVG e PNG, cores, fontes, fachada, tom de voz, a skill da marca para assistentes de IA e o kit completo em ZIP.
 
 Os dados ficam no navegador de cada pessoa; não há banco de dados nem login.
 

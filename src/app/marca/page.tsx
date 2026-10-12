@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Marca" };
 
-// The writing skill is a file in the kit; the page shows that same file, read at build time.
-const skill = readFileSync(join(process.cwd(), "public/brand/paiol-voz/SKILL.md"), "utf8");
+// The brand skill is a file in the kit; the page shows that same file, read at build time.
+const skill = readFileSync(join(process.cwd(), "public/brand/paiol-marca/SKILL.md"), "utf8");
 
 const sections = [
   { id: "logo", label: "Logo" },
@@ -23,6 +23,7 @@ const sections = [
   { id: "tipografia", label: "Tipografia" },
   { id: "fachada", label: "Fachada" },
   { id: "tom", label: "Tom de voz" },
+  { id: "assistente", label: "Assistente de IA" },
 ];
 
 function Section({ id, title, intro, children }: { id: string; title: string; intro?: string; children: React.ReactNode }) {
@@ -388,18 +389,18 @@ export default function BrandPage() {
             <ul className="mt-3 text-muted-foreground">{store.hours.map(h => <li key={h}>{h}</li>)}</ul>
           </div>
         </div>
+      </Section>
 
-        <div className="mt-8 rounded-lg border bg-card p-6">
-          <h3 className="font-semibold">Assistente de escrita</h3>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-            Uma skill com o jeito de falar da Paiol para assistentes de IA: legendas, ofertas, respostas a avaliações e mensagens
-            de WhatsApp saem no tom da loja e com os dados certos. No Claude, envie o arquivo .zip em Configurações → Capacidades
-            → Skills. No ChatGPT, no Gemini ou em outro assistente, copie o texto e cole nas instruções do projeto ou do GPT.
+      <Section id="assistente" title="Assistente de IA" intro="A marca inteira numa skill para assistentes de IA: tom de voz, cores, logo, fontes e o que tem no kit. Legendas, respostas, cartazes e pedidos à gráfica saem no jeito da Paiol e com os dados certos.">
+        <div className="rounded-lg border bg-card p-6">
+          <p className="max-w-3xl text-sm text-muted-foreground">
+            No Claude, envie o arquivo .zip em Configurações → Capacidades → Skills. No ChatGPT, no Gemini ou em outro
+            assistente, copie o texto e cole nas instruções do projeto ou do GPT.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <CopyText text={skill} label="Copiar a skill" />
-            <Button asChild variant="outline"><a href="/brand/paiol-voz.zip" download><Download /> Baixar para o Claude (.zip)</a></Button>
-            <Button asChild variant="outline"><a href="/brand/paiol-voz/SKILL.md" download><Download /> SKILL.md</a></Button>
+            <Button asChild variant="outline"><a href="/brand/paiol-marca.zip" download><Download /> Baixar para o Claude (.zip)</a></Button>
+            <Button asChild variant="outline"><a href="/brand/paiol-marca/SKILL.md" download><Download /> SKILL.md</a></Button>
           </div>
           <details className="mt-4 rounded-md border bg-muted/40">
             <summary className="cursor-pointer px-4 py-2 text-sm font-medium">Ver o texto da skill</summary>

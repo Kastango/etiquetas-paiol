@@ -162,8 +162,8 @@ with zipfile.ZipFile(out / "paiol-brand-kit.zip", "w", zipfile.ZIP_DEFLATED) as 
             archive.write(path, path.name)
     for file in ["Poppins-400.ttf", "Poppins-500.ttf", "Poppins-600.ttf", "Poppins-700.ttf", "Poppins-800.ttf", "Fraunces-Variable.ttf"]:
         archive.write(root / "public/fonts" / file, f"fonts/{file}")
-    archive.write(out / "paiol-voz/SKILL.md", "paiol-voz/SKILL.md")
-# The writing skill as Claude takes it: a zip holding the skill's folder.
-with zipfile.ZipFile(out / "paiol-voz.zip", "w", zipfile.ZIP_DEFLATED) as archive:
-    archive.write(out / "paiol-voz/SKILL.md", "paiol-voz/SKILL.md")
+    archive.write(out / "paiol-marca/SKILL.md", "paiol-marca/SKILL.md")
+# The brand skill as Claude takes it: a zip holding the skill's folder.
+with zipfile.ZipFile(out / "paiol-marca.zip", "w", zipfile.ZIP_DEFLATED) as archive:
+    archive.write(out / "paiol-marca/SKILL.md", "paiol-marca/SKILL.md")
 print(f"Generated {len(list(out.glob('*.svg')))} SVGs, PNGs and the kit archive")

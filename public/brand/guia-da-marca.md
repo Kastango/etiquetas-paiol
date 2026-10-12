@@ -96,8 +96,9 @@ preço e unidade primeiro) e verdadeira (conta o que o produto tem, sem prometer
 clientes elogiam variedade, preço justo, organização e atendimento; os textos reforçam isso.
 
 As regras completas, os formatos de cada canal, exemplos e a lista de conferência estão em
-paiol-voz/SKILL.md, uma skill para assistentes de IA. No Claude, envie o .zip da página Marca
-do site em Configurações → Capacidades → Skills; em outro assistente, cole o texto nas instruções.
+paiol-marca/SKILL.md, uma skill para assistentes de IA que leva também as cores, a logo, as fontes
+e o conteúdo deste kit. No Claude, envie o .zip da página Marca do site em Configurações →
+Capacidades → Skills; em outro assistente, cole o texto nas instruções.
 
 Dados da loja: R. Palmas, 1561, Francisco Beltrão · WhatsApp (46) 92001-1470 ·
 @paiolprodutosnaturais · Segunda a sexta, 8h30 às 12h e 13h30 às 18h30; sábado, 8h30 às 12h30.

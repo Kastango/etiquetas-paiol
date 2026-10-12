@@ -9,9 +9,10 @@ quem é a loja, de onde vêm as decisões e o que já foi recusado.
 - Regras de logo, cores, fontes, fachada e tom de voz: `public/brand/guia-da-marca.md`.
   A página `/marca` mostra as mesmas regras a partir de `src/lib/brand.ts`; mude os dois juntos.
 - Dados da loja (endereço, WhatsApp, horários): `store` em `src/lib/brand.ts`. Legendas e kit leem dali.
-- Escrita no tom da Paiol: `public/brand/paiol-voz/SKILL.md`, a skill que a página `/marca` mostra e o
-  kit leva. Ela repete os dados da loja e os exemplos de `src/lib/brand.ts` para funcionar sozinha
-  em qualquer assistente; ao mudar um, mude o outro.
+- A marca para assistentes de IA: `public/brand/paiol-marca/SKILL.md` (tom de voz, cores, logo, fontes e
+  kit), a skill que a página `/marca` mostra e o kit leva. Ela repete as cores, os arquivos de logo, os
+  dados da loja e os exemplos de `src/lib/brand.ts` para funcionar sozinha em qualquer assistente;
+  `src/lib/brand.test.ts` falha quando os dois divergem.
 - Logos e fotos são gerados por `scripts/extract-brand-assets.py`; a arte e os mockups da fachada,
   por `scripts/make-facade-mockups.py`, que roda depois e acrescenta a pasta fachada ao ZIP.
   As fotos de produto saem dos PSDs por `scripts/extract-product-photos.py`.
