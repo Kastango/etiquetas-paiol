@@ -56,6 +56,10 @@ No feed e no retrato, a logo tem a altura do bloco "Oferta" + validade; no story
 centralizado: o bloco da faixa verde fica no meio da faixa inteira, para o verde não sobrar embaixo,
 mas termina 150 px acima da base (barra de resposta); nada entra nos 250 px do topo.
 
+A validade é uma data (padrão: uma semana a partir de hoje, "Válida até 18 de outubro.") ou
+"Válida enquanto durarem os estoques."; o post e a legenda escrevem o texto a partir dessa escolha
+(`validityText`). Um rascunho salvo com data já passada volta para daqui a uma semana.
+
 A sombra das tigelas copia a dos PSDs: duas sombras projetadas em Multiplicação, luz global
 a 137°, 23% / distância 30 / tamanho 16 e 39% / 77 / 62, ambas com 8% de ruído (o granulado).
 

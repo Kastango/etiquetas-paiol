@@ -13,16 +13,16 @@ import { matchPhoto, photos } from "@/lib/brand";
 import { useCopy } from "@/lib/clipboard";
 import { downloadBlob } from "@/lib/download";
 import { fraunces, poppins } from "@/lib/fonts";
-import { FORMATS, caption, drawOffer, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
+import { FORMATS, caption, drawOffer, inAWeek, isoDate, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
 import { UNITS, currency, loadProducts, type Product } from "@/lib/products";
 import { cn, slug } from "@/lib/utils";
 import { PhotoPicker } from "./photo-picker";
 
 const DRAFT_KEY = "offer-draft";
-const initial: Offer = {
+const example = (): Offer => ({
   name: "Nozes chilenas quebradas", price: 4.79, oldPrice: 5, unit: "100g",
-  headline: "Oferta", validity: "Válida enquanto durar o estoque.", background: "white",
-};
+  headline: "Oferta", until: inAWeek(), background: "white",
+});
 
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -50,14 +50,19 @@ function Field({ id, label, hint, children }: { id: string; label: string; hint?
   );
 }
 
+/** The saved draft; an end date already past moves to a week from today, so an old draft never posts an expired offer. */
 function loadDraft(): Offer {
+  const initial = example();
   try {
-    const draft = localStorage.getItem(DRAFT_KEY);
-    return draft ? { ...initial, ...JSON.parse(draft) } : initial;
+    const offer: Offer & { validity?: string } = { ...initial, ...JSON.parse(localStorage.getItem(DRAFT_KEY) ?? "{}") };
+    delete offer.validity; // free text, before `until`
+    if (offer.until !== null && !(offer.until >= isoDate(new Date()))) offer.until = initial.until;
+    return offer;
   } catch {
     return initial; // a broken draft just falls back to the example
   }
 }
+
 
 /** ?formato=story opens straight in that format. */
 function requestedFormat(): OfferFormat {
@@ -178,8 +183,23 @@ function OfferEditor() {
           <Field id="headline" label="Chamada" hint="Uma a três palavras: Oferta, Oferta de Natal, Novidade.">
             <Input id="headline" maxLength={32} value={offer.headline} onChange={e => set({ headline: e.target.value })} />
           </Field>
-          <Field id="validity" label="Validade">
-            <Input id="validity" maxLength={70} value={offer.validity} onChange={e => set({ validity: e.target.value })} />
+          <Field id="validity" label="Validade" hint={`No post: “${validityText(offer)}”`}>
+            <div role="radiogroup" aria-label="Validade" className="grid grid-cols-2 rounded-lg border bg-card p-1">
+              {[
+                { label: "Até uma data", active: offer.until !== null, until: offer.until ?? inAWeek() },
+                { label: "Enquanto durarem os estoques", active: offer.until === null, until: null },
+              ].map(option => (
+                <button key={option.label} type="button" role="radio" aria-checked={option.active} onClick={() => set({ until: option.until })}
+                  className={cn("min-h-9 rounded-md px-2 py-1 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
+                    option.active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            {offer.until !== null && (
+              <Input id="validity" type="date" aria-label="Último dia da oferta" min={isoDate(new Date())} value={offer.until}
+                onChange={e => set({ until: e.target.value || inAWeek() })} />
+            )}
           </Field>
           <Field id="background" label="Fundo">
             <Select value={offer.background} onValueChange={(background: Offer["background"]) => set({ background })}>

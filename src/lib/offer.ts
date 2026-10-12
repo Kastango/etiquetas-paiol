@@ -9,7 +9,8 @@ export interface Offer {
   oldPrice: number;
   unit: string;
   headline: string;
-  validity: string;
+  /** Last day of the offer as YYYY-MM-DD, or null while stocks last. */
+  until: string | null;
   background: OfferBackground;
 }
 export interface OfferAssets { photo: HTMLImageElement | null; logo: HTMLImageElement; sans: string; display: string }
@@ -69,6 +70,19 @@ function metrics(ctx: CanvasRenderingContext2D) {
 }
 
 const money = (value: number) => `R$ ${decimal(value)}`;
+
+const pad = (n: number) => String(n).padStart(2, "0");
+/** YYYY-MM-DD in local time, the format of <input type="date">. */
+export const isoDate = (date: Date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+/** A week from today: the default end of an offer. */
+export const inAWeek = (today = new Date()) => isoDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7));
+
+/** "Válida até 18 de outubro." or "Válida enquanto durarem os estoques." */
+export function validityText(offer: Pick<Offer, "until">) {
+  if (!offer.until) return "Válida enquanto durarem os estoques.";
+  const [year, month, day] = offer.until.split("-").map(Number);
+  return `Válida até ${new Date(year, month - 1, day).toLocaleDateString("pt-BR", { day: "numeric", month: "long" })}.`;
+}
 
 /*
  * The bowl shadows of the original offer PSDs: two Photoshop drop shadows in Multiply under global
@@ -228,11 +242,11 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
   const head = fit(ctx, offer.headline || "Oferta", display, room, L.headlineSize, 52, 2);
   ctx.font = display(head.size);
   const headCap = metrics(ctx).cap, headLead = head.size * 0.98;
-  const validity = offer.validity.trim() ? fit(ctx, offer.validity, sans(500), room, validitySize, Math.round(validitySize * 0.75), 1) : null;
-  ctx.font = sans(500)(validity?.size ?? validitySize);
+  const validity = fit(ctx, validityText(offer), sans(500), room, validitySize, Math.round(validitySize * 0.75), 1);
+  ctx.font = sans(500)(validity.size);
   const validityCap = metrics(ctx).cap;
-  const validityGap = validity ? head.size * 0.3 : 0;
-  const textHeight = headCap + (head.lines.length - 1) * headLead + (validity ? validityGap + validityCap : 0);
+  const validityGap = head.size * 0.3;
+  const textHeight = headCap + (head.lines.length - 1) * headLead + validityGap + validityCap;
 
   if (stack) {
     const logoGap = L.headlineSize * 0.45;
@@ -244,11 +258,9 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
     ctx.font = display(head.size);
     head.lines.forEach((line, i) => ctx.fillText(line, centre, top + headCap + i * headLead));
     top += headCap + (head.lines.length - 1) * headLead;
-    if (validity) {
-      ctx.font = sans(500)(validity.size);
-      ctx.fillText(validity.lines[0], centre, top + validityGap + validityCap);
-      top += validityGap + validityCap;
-    }
+    ctx.font = sans(500)(validity.size);
+    ctx.fillText(validity.lines[0], centre, top + validityGap + validityCap);
+    top += validityGap + validityCap;
     drawLogo(centre - logoWidth(logoHeight) / 2, top + logoGap, logoHeight);
     ctx.textAlign = "left";
     return;
@@ -264,10 +276,8 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
     const bearing = ctx.measureText(line).actualBoundingBoxLeft;
     ctx.fillText(line, MARGIN + bearing, textTop + headCap + i * headLead);
   });
-  if (validity) {
-    ctx.font = sans(500)(validity.size);
-    ctx.fillText(validity.lines[0], MARGIN, textTop + textHeight);
-  }
+  ctx.font = sans(500)(validity.size);
+  ctx.fillText(validity.lines[0], MARGIN, textTop + textHeight);
   drawLogo(L.width - MARGIN - logoWidth(rowLogo), top + (blockHeight - rowLogo) / 2, rowLogo);
 }
 
@@ -276,7 +286,7 @@ export function caption(offer: Offer) {
   const unit = offer.unit === "100g" ? "a cada 100 g" : offer.unit === "kg" ? "o quilo" : offer.unit;
   const was = offer.oldPrice > offer.price ? ` (antes ${money(offer.oldPrice)})` : "";
   const headline = offer.headline.trim() || "Oferta";
-  const offerLines = [`${headline}! 🍃`, `${offer.name.replace(/\s*\|\s*/g, " ")} por ${money(offer.price)} ${unit}${was}.`, offer.validity.trim()];
+  const offerLines = [`${headline}! 🍃`, `${offer.name.replace(/\s*\|\s*/g, " ")} por ${money(offer.price)} ${unit}${was}.`, validityText(offer)];
   return [
     ...offerLines.filter(Boolean),
     "",
