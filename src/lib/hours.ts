@@ -1,9 +1,9 @@
 import { store } from "./brand";
 import { COLORS } from "./offer";
-import { THEMES, type Theme } from "./themes";
+import { USUAL, hoursSample, occasion, palette, type HoursRow } from "./occasions";
 
 export type HoursFormat = "a4" | "portrait" | "story";
-export interface HoursRow { days: string; hours: string }
+export type { HoursRow };
 export interface Hours {
   title: string;
   /** Each row: the days, then their hours; a line break in the hours starts a new line on the sign. */
@@ -11,42 +11,21 @@ export interface Hours {
   /** An optional notice under the hours, such as a holiday. */
   note: string;
   whatsapp: string;
-  theme: Theme;
+  /** Padrão or a date of the year (occasions.ts), and the index of its palette. */
+  theme: string;
+  palette: number;
 }
 /** `logo` and `lights` are the theme's. */
 export interface HoursAssets { logo: HTMLImageElement; lights: HTMLImageElement | null; sans: string }
 
-/** Each theme's starting text: the store's usual hours, or an example of the holidays to fill in. */
-export const SAMPLES: Record<Theme, Pick<Hours, "title" | "rows" | "note">> = {
-  padrao: {
-    title: "Horário de funcionamento",
-    rows: [
-      { days: "Segunda a sexta", hours: "Das 8h30 às 12h00\ne 13h30 às 18h30" },
-      { days: "Sábado", hours: "Das 8h30 às 12h30" },
-      { days: "Domingo", hours: "Fechado" },
-    ],
-    note: "",
-  },
-  natal: {
-    title: "Horário de fim de ano",
-    rows: [
-      { days: "24 de dezembro", hours: "Das 8h30 às 12h00" },
-      { days: "25 de dezembro", hours: "Fechado" },
-      { days: "31 de dezembro", hours: "Das 8h30 às 12h00" },
-      { days: "1º de janeiro", hours: "Fechado" },
-    ],
-    note: "Boas festas!",
-  },
-};
-
-export const defaultHours = (): Hours => ({ ...structuredClone(SAMPLES.padrao), whatsapp: store.whatsapp, theme: "padrao" });
+export const defaultHours = (): Hours => ({ ...structuredClone(USUAL), whatsapp: store.whatsapp, theme: "padrao", palette: 0 });
 
 /** Switches the look; text still at the old theme's sample takes the new one's, so nothing typed is lost. */
-export function withTheme(hours: Hours, theme: Theme): Hours {
-  const old = SAMPLES[hours.theme], next = structuredClone(SAMPLES[theme]);
-  const same = (key: keyof typeof old) => JSON.stringify(hours[key]) === JSON.stringify(old[key]);
+export function withTheme(hours: Hours, theme: string, today = new Date()): Hours {
+  const old = hoursSample(occasion(hours.theme), today), next = hoursSample(occasion(theme), today);
+  const same = (key: "title" | "rows" | "note") => JSON.stringify(hours[key]) === JSON.stringify(old[key]);
   return {
-    ...hours, theme,
+    ...hours, theme, palette: 0,
     title: same("title") ? next.title : hours.title,
     rows: same("rows") ? next.rows : hours.rows,
     note: same("note") ? next.note : hours.note,
@@ -77,7 +56,7 @@ const filled = (rows: HoursRow[]) => rows.filter(row => row.days.trim() || row.h
  */
 export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: HoursFormat, assets: HoursAssets) {
   const F = HOURS_FORMATS[format], scale = F.width / W, H = F.height / scale;
-  const theme = THEMES[hours.theme], accent = theme.band;
+  const accent = palette(hours.theme, hours.palette).band;
   const font = (weight: number, size: number) => `${weight} ${size}px ${assets.sans}`;
   ctx.canvas.width = F.width;
   ctx.canvas.height = F.height;
@@ -88,7 +67,7 @@ export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: H
 
   // The band is 29% of the width below the safe area; the logo's drawing is 45% of that, centred in it.
   const band = F.safeTop + 313;
-  ctx.fillStyle = theme.band;
+  ctx.fillStyle = accent;
   ctx.fillRect(0, 0, W, band);
   if (assets.lights) {
     // The story's lights, turned upside down to hang from the top right corner.
@@ -172,7 +151,7 @@ export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: H
   if (note.length) {
     if (rows.length) y += gap.note * g * k;
     ctx.font = font(600, size.note * k);
-    ctx.fillStyle = hours.theme === "natal" ? accent : COLORS.vinho;
+    ctx.fillStyle = hours.theme === "padrao" ? COLORS.vinho : accent;
     note.forEach((line, j) => ctx.fillText(line, MARGIN, y + j * gap.noteLead * k));
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -184,7 +163,7 @@ export function hoursText(hours: Hours) {
   const rows = filled(hours.rows).map(row => `${row.days.trim()}: ${sentence(lines(row.hours).join(" "))}`);
   const whatsapp = hours.whatsapp.trim();
   return [
-    `${hours.title.trim() || "Horário de funcionamento"} ${THEMES[hours.theme].emoji}`,
+    `${hours.title.trim() || "Horário de funcionamento"} ${occasion(hours.theme).emoji}`,
     ...rows,
     ...lines(hours.note),
     "",

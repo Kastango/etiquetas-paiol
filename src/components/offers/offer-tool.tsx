@@ -13,8 +13,9 @@ import { matchPhoto, photos } from "@/lib/brand";
 import { useCopy } from "@/lib/clipboard";
 import { downloadBlob } from "@/lib/download";
 import { fraunces, poppins } from "@/lib/fonts";
-import { FORMATS, HEADLINES, caption, drawOffer, inAWeek, isoDate, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
-import { THEMES, type Theme } from "@/lib/themes";
+import { OccasionPicker } from "@/components/occasion-picker";
+import { FORMATS, caption, drawOffer, inAWeek, isoDate, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
+import { LOGOS, PADRAO, occasion, offerUntil, palette, unmarked } from "@/lib/occasions";
 import { loadLabelTypes, typeOf } from "@/lib/label-types";
 import { UNITS, currency, loadProducts, type Product } from "@/lib/products";
 import { cn, slug } from "@/lib/utils";
@@ -23,7 +24,7 @@ import { PhotoPicker } from "./photo-picker";
 const DRAFT_KEY = "offer-draft";
 const example = (): Offer => ({
   name: "Nozes chilenas quebradas", price: 4.79, oldPrice: 5, unit: "100g",
-  headline: HEADLINES.padrao, until: inAWeek(), background: "white", theme: "padrao",
+  headline: PADRAO.headlines[0], until: inAWeek(), background: "white", theme: PADRAO.id, palette: 0,
 });
 
 function loadImage(src: string) {
@@ -66,12 +67,6 @@ function loadDraft(): Offer {
 }
 
 
-/** Christmas offers ran until 24 December, while that day is still ahead. */
-function christmasEve(today = new Date()) {
-  const eve = `${today.getFullYear()}-12-24`;
-  return isoDate(today) <= eve ? eve : null;
-}
-
 /** ?formato=story opens straight in that format. */
 function requestedFormat(): OfferFormat {
   const requested = new URLSearchParams(window.location.search).get("formato");
@@ -99,23 +94,28 @@ function OfferEditor() {
   useEffect(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(offer)), [offer]);
 
   // Reloads fonts, the theme's logo and lights, and the photo; uploaded photos are object URLs that live only in memory.
-  const theme = THEMES[offer.theme];
+  const logo = LOGOS[palette(offer.theme, offer.palette).logo], lights = occasion(offer.theme).lights;
   useEffect(() => {
     let cancelled = false;
-    Promise.all([loadFonts(), loadImage(theme.logo), theme.lights ? loadImage(theme.lights) : null, loadImage(photoSrc).catch(() => null)])
+    Promise.all([loadFonts(), loadImage(logo), lights ? loadImage(lights) : null, loadImage(photoSrc).catch(() => null)])
       .then(([, logo, lights, photo]) => {
         if (!cancelled) setAssets({ logo, lights, photo, sans: poppins.style.fontFamily, display: fraunces.style.fontFamily });
       })
       .catch(() => toast.error("Não foi possível carregar a logo. Recarregue a página."));
     return () => { cancelled = true; };
-  }, [photoSrc, theme]);
+  }, [photoSrc, logo, lights]);
 
-  /** A headline still at the old theme's default takes the new one's; Christmas offers default to the 24th. */
-  const pickTheme = (next: Theme) => set({
-    theme: next,
-    headline: offer.headline === HEADLINES[offer.theme] ? HEADLINES[next] : offer.headline,
-    until: next === "natal" && offer.until !== null ? (christmasEve() ?? offer.until) : offer.until,
-  });
+  /**
+   * A headline still at one of the old theme's suggestions takes the new theme's first; an end date runs
+   * to the new date (the eve of a holiday), and back to a week from today from a date's own end.
+   */
+  const pickTheme = (id: string) => {
+    const old = occasion(offer.theme), next = occasion(id);
+    const until = offer.until === null ? null
+      : id === PADRAO.id ? (offer.until === offerUntil(old) ? inAWeek() : offer.until)
+      : offerUntil(next) ?? offer.until;
+    set({ theme: id, palette: 0, until, headline: old.headlines.includes(offer.headline) ? next.headlines[0] : offer.headline });
+  };
 
   useEffect(() => {
     const ctx = canvas.current?.getContext("2d");
@@ -155,18 +155,7 @@ function OfferEditor() {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
       <form className="min-w-0 space-y-6" onSubmit={e => e.preventDefault()}>
-        <div className="space-y-1.5">
-          <p id="theme-label" className="text-sm font-medium leading-none">Tema</p>
-          <div role="radiogroup" aria-labelledby="theme-label" className="grid grid-cols-2 rounded-lg border bg-card p-1">
-            {(Object.keys(THEMES) as Theme[]).map(key => (
-              <button key={key} type="button" role="radio" aria-checked={offer.theme === key} onClick={() => pickTheme(key)}
-                className={cn("min-h-9 rounded-md px-2 py-1 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
-                  offer.theme === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
-                {THEMES[key].label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <OccasionPicker theme={offer.theme} palette={offer.palette} onTheme={pickTheme} onPalette={index => set({ palette: index })} />
 
         {products.length > 0 && (
           <Field id="product" label="Produto da lista de etiquetas" hint="Preenche nome, preço e unidade. Confira antes de publicar.">
@@ -211,9 +200,17 @@ function OfferEditor() {
         <PhotoPicker productName={offer.name} value={photoSrc} onChange={setPhotoSrc} />
 
         <fieldset className="space-y-4">
-          <legend className="pb-2 font-semibold">Faixa {offer.theme === "natal" ? "vermelha" : "verde"}</legend>
-          <Field id="headline" label="Chamada" hint="Curta: Oferta, Novidade. | quebra a linha; *palavra* entre asteriscos fica em destaque.">
+          <legend className="pb-2 font-semibold">Faixa</legend>
+          <Field id="headline" label="Chamada" hint="Curta. | quebra a linha; *palavra* entre asteriscos fica em destaque.">
             <Input id="headline" maxLength={40} value={offer.headline} onChange={e => set({ headline: e.target.value })} />
+            <div className="flex flex-wrap gap-1.5 pt-1" aria-label="Chamadas sugeridas">
+              {occasion(offer.theme).headlines.map(headline => (
+                <button key={headline} type="button" onClick={() => set({ headline })}
+                  className={cn("rounded-full border px-2.5 py-1 text-xs transition-colors hover:bg-accent", offer.headline === headline && "border-primary bg-primary/10 text-primary")}>
+                  {unmarked(headline).replace(/\s*\|\s*/g, " ")}
+                </button>
+              ))}
+            </div>
           </Field>
           <Field id="validity" label="Validade" hint={`No post: “${validityText(offer)}”`}>
             <div role="radiogroup" aria-label="Validade" className="grid grid-cols-2 rounded-lg border bg-card p-1">

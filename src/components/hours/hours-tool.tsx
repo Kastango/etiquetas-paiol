@@ -11,7 +11,8 @@ import { useCopy } from "@/lib/clipboard";
 import { downloadBlob } from "@/lib/download";
 import { poppins } from "@/lib/fonts";
 import { HOURS_FORMATS, defaultHours, drawHours, hoursText, withTheme, type Hours, type HoursAssets, type HoursFormat, type HoursRow } from "@/lib/hours";
-import { THEMES, type Theme } from "@/lib/themes";
+import { OccasionPicker } from "@/components/occasion-picker";
+import { LOGOS, PADRAO, hoursSample, occasion, palette } from "@/lib/occasions";
 import { cn } from "@/lib/utils";
 
 const DRAFT_KEY = "hours-draft";
@@ -57,15 +58,15 @@ function HoursEditor() {
 
   useEffect(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(hours)), [hours]);
 
-  const theme = THEMES[hours.theme];
+  const logo = LOGOS[palette(hours.theme, hours.palette).logo], lights = occasion(hours.theme).lights;
   useEffect(() => {
     let cancelled = false;
     const fonts = Promise.all([400, 500, 600].map(w => document.fonts.load(`${w} 40px ${poppins.style.fontFamily}`, "Horário Sábado 8h30 Áá")));
-    Promise.all([fonts, loadImage(theme.logo), theme.lights ? loadImage(theme.lights) : null])
+    Promise.all([fonts, loadImage(logo), lights ? loadImage(lights) : null])
       .then(([, logo, lights]) => { if (!cancelled) setAssets({ logo, lights, sans: poppins.style.fontFamily }); })
       .catch(() => toast.error("Não foi possível carregar a logo. Recarregue a página."));
     return () => { cancelled = true; };
-  }, [theme]);
+  }, [logo, lights]);
 
   useEffect(() => {
     const ctx = canvas.current?.getContext("2d");
@@ -101,18 +102,18 @@ function HoursEditor() {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
       <form className="min-w-0 space-y-6" onSubmit={e => e.preventDefault()}>
-        <div className="space-y-1.5">
-          <p id="hours-theme" className="text-sm font-medium leading-none">Tema</p>
-          <div role="radiogroup" aria-labelledby="hours-theme" className="grid grid-cols-2 rounded-lg border bg-card p-1">
-            {(Object.keys(THEMES) as Theme[]).map(key => (
-              <button key={key} type="button" role="radio" aria-checked={hours.theme === key} onClick={() => setHours(h => withTheme(h, key))}
-                className={cn("min-h-9 rounded-md px-2 py-1 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
-                  hours.theme === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
-                {THEMES[key].label}
-              </button>
-            ))}
-          </div>
-          {hours.theme === "natal" && <p className="text-xs text-muted-foreground">Os dias de fim de ano são um exemplo: confira com a loja.</p>}
+        <div className="space-y-2">
+          <OccasionPicker theme={hours.theme} palette={hours.palette} onTheme={id => setHours(h => withTheme(h, id))} onPalette={index => set({ palette: index })} />
+          {hours.theme !== PADRAO.id && (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                {occasion(hours.theme).holiday ? "Texto sugerido para o feriado: confira os horários com a loja." : "Horário de sempre, com uma mensagem da data."}
+              </p>
+              <Button type="button" variant="ghost" size="sm" onClick={() => set(hoursSample(occasion(hours.theme)))}>
+                <RotateCcw /> Usar texto sugerido
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-1.5">

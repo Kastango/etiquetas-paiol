@@ -1,6 +1,6 @@
 import { store } from "./brand";
 import { decimal } from "./products";
-import { THEMES, marked, unmarked, type Theme } from "./themes";
+import { marked, occasion, palette, unmarked } from "./occasions";
 
 export type OfferFormat = "square" | "portrait" | "story";
 export type OfferBackground = "white" | "palha";
@@ -13,13 +13,13 @@ export interface Offer {
   /** Last day of the offer as YYYY-MM-DD, or null while stocks last. */
   until: string | null;
   background: OfferBackground;
-  theme: Theme;
+  /** Padrão or a date of the year (occasions.ts), and the index of its palette. */
+  theme: string;
+  palette: number;
 }
 /** `logo` and `lights` are the theme's. */
 export interface OfferAssets { photo: HTMLImageElement | null; logo: HTMLImageElement; lights: HTMLImageElement | null; sans: string; display: string }
 
-/** The headline each theme starts with. */
-export const HEADLINES: Record<Theme, string> = { padrao: "Oferta", natal: "Oferta | *especial* | de Natal" };
 
 interface Box { x: number; y: number; w: number; h: number }
 interface Layout {
@@ -238,14 +238,14 @@ function drawMarked(ctx: CanvasRenderingContext2D, line: string, x: number, y: n
 }
 
 /**
- * The band, green or the theme's colour. Positions come from the glyphs' measured bounds: the headline's
+ * The band, in the theme's colour. Positions come from the glyphs' measured bounds: the headline's
  * capitals and the validity's baseline delimit the block, and the logo is placed by its drawing, not its
  * image, whose SVG source pads the drawing by 8% of its height on every side. The headline takes up to
  * three lines, as large as fits the band's height.
  */
 function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets: OfferAssets,
   sans: (weight: number) => (size: number) => string, display: (size: number) => string) {
-  const { band } = L, theme = THEMES[offer.theme];
+  const { band } = L, theme = palette(offer.theme, offer.palette);
   ctx.fillStyle = theme.band;
   ctx.fillRect(0, band.y, L.width, L.height - band.y);
   const logo = assets.logo, ratio = logo.naturalWidth / logo.naturalHeight;
@@ -256,7 +256,7 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
   const logoWidth = (height: number) => height * 1.16 * ratio - height * 0.16;
 
   const stack = band.style === "stack";
-  // The lights hang into the story's bottom right corner, as in the 2022 Christmas story.
+  // Natal's lights hang into the story's bottom right corner, as in the 2022 Christmas story.
   if (stack && assets.lights) ctx.drawImage(assets.lights, L.width - assets.lights.naturalWidth, L.height - assets.lights.naturalHeight);
   const validitySize = Math.round(L.headlineSize * (stack ? 0.24 : 0.22));
   const logoHeight = stack ? Math.round(L.headlineSize * 0.8) : 0;
@@ -315,7 +315,7 @@ export function caption(offer: Offer) {
   const unit = offer.unit === "100g" ? "a cada 100 g" : offer.unit === "kg" ? "o quilo" : offer.unit;
   const was = offer.oldPrice > offer.price ? ` (antes ${money(offer.oldPrice)})` : "";
   const headline = unmarked(offer.headline).replace(/\s*\|\s*/g, " ").trim() || "Oferta";
-  const offerLines = [`${headline}! ${THEMES[offer.theme].emoji}`, `${offer.name.replace(/\s*\|\s*/g, " ")} por ${money(offer.price)} ${unit}${was}.`, validityText(offer)];
+  const offerLines = [`${headline}! ${occasion(offer.theme).emoji}`, `${offer.name.replace(/\s*\|\s*/g, " ")} por ${money(offer.price)} ${unit}${was}.`, validityText(offer)];
   return [
     ...offerLines.filter(Boolean),
     "",
