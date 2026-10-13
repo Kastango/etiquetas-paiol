@@ -408,12 +408,10 @@ export default function BrandPage() {
       <Section id="assistente" title="Assistente de IA" intro="A marca inteira numa skill para assistentes de IA: tom de voz, cores, logo, fontes e o que tem no kit. Legendas, respostas, cartazes e pedidos à gráfica saem no jeito da Paiol e com os dados certos.">
         <div className="rounded-lg border bg-card p-6">
           <p className="max-w-3xl text-sm text-muted-foreground">
-            No Claude, envie o arquivo .zip em Configurações → Capacidades → Skills. No ChatGPT, no Gemini ou em outro
-            assistente, copie o texto e cole nas instruções do projeto ou do GPT.
+            Copie o texto e cole nas instruções do projeto no Claude, no ChatGPT, no Gemini ou em outro assistente.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <CopyText text={skill} label="Copiar a skill" />
-            <Button asChild variant="outline"><a href="/brand/paiol-marca.zip" download><Download /> Baixar para o Claude (.zip)</a></Button>
             <Button asChild variant="outline"><a href="/brand/paiol-marca/SKILL.md" download><Download /> SKILL.md</a></Button>
           </div>
           <details className="mt-4 rounded-md border bg-muted/40">
