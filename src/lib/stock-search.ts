@@ -65,7 +65,7 @@ export function englishTerm(name: string) {
   return nouns.length ? [...adjectives, ...nouns].join(" ") : name.trim();
 }
 
-/** Stock sites with photos like the library's: one bowl, seen from above, on a plain background. */
+/** Stock sites whose licences allow the store's posts, searched for photos like the library's: one bowl, seen from above. */
 export function stockSearches(name: string) {
   const term = englishTerm(name);
   const q = (suffix: string) => encodeURIComponent(`${term} ${suffix}`.trim());
@@ -74,8 +74,6 @@ export function stockSearches(name: string) {
     sites: [
       { label: "Pexels", href: `https://www.pexels.com/search/${q("bowl top view")}/` },
       { label: "Unsplash", href: `https://unsplash.com/s/photos/${q("bowl top view")}` },
-      { label: "Freepik", href: `https://www.freepik.com/search?format=search&query=${q("bowl top view")}` },
-      { label: "Google Imagens", href: `https://www.google.com/search?tbm=isch&q=${q("bowl top view white background")}` },
     ],
   };
 }

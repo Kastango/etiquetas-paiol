@@ -14,7 +14,7 @@ import { useCopy } from "@/lib/clipboard";
 import { downloadBlob } from "@/lib/download";
 import { fraunces, poppins } from "@/lib/fonts";
 import { OccasionPicker } from "@/components/occasion-picker";
-import { FORMATS, caption, drawOffer, inAWeek, isoDate, offerLogo, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
+import { FORMATS, caption, drawOffer, inAWeek, isoDate, offerLogo, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
 import { LOGOS, PADRAO, occasion, offerUntil, unmarked } from "@/lib/occasions";
 import { UNITS, currency } from "@/lib/products";
 import { cn, slug } from "@/lib/utils";
@@ -43,12 +43,11 @@ async function loadFonts() {
   ]);
 }
 
-function Field({ id, label, hint, children }: { id: string; label: string; hint?: string; children: React.ReactNode }) {
+function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
       {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -174,7 +173,7 @@ function OfferEditor() {
 
         <fieldset className="space-y-4">
           <legend className="pb-2 font-semibold">Produto</legend>
-          <Field id="name" label="Nome" hint="Use | para escolher onde a linha quebra.">
+          <Field id="name" label="Nome">
             <Input id="name" value={offer.name} onChange={e => set({ name: e.target.value })} />
           </Field>
           <div className="grid grid-cols-[1fr_1fr_6rem] gap-3">
@@ -203,7 +202,7 @@ function OfferEditor() {
 
         <fieldset className="space-y-4">
           <legend className="pb-2 font-semibold">Faixa</legend>
-          <Field id="headline" label="Chamada" hint="Curta. | quebra a linha; *palavra* entre asteriscos fica em destaque.">
+          <Field id="headline" label="Chamada">
             <Input id="headline" maxLength={40} value={offer.headline} onChange={e => set({ headline: e.target.value })} />
             <div className="flex flex-wrap gap-1.5 pt-1" aria-label="Chamadas sugeridas">
               {occasion(offer.theme).headlines.map(headline => (
@@ -214,7 +213,7 @@ function OfferEditor() {
               ))}
             </div>
           </Field>
-          <Field id="validity" label="Validade" hint={`No post: “${validityText(offer)}”`}>
+          <Field id="validity" label="Validade">
             <div role="radiogroup" aria-label="Validade" className="grid grid-cols-2 rounded-lg border bg-card p-1">
               {[
                 { label: "Até uma data", active: offer.until !== null, until: offer.until ?? inAWeek() },
@@ -232,15 +231,8 @@ function OfferEditor() {
                 onChange={e => set({ until: e.target.value || inAWeek() })} />
             )}
           </Field>
-          <Field id="background" label="Fundo">
-            <Select value={offer.background} onValueChange={(background: Offer["background"]) => set({ background })}>
-              <SelectTrigger id="background"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="white">Branco</SelectItem>
-                <SelectItem value="palha">Palha</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
+          <Choice label="Fundo" options={(["white", "palha"] as const).map(background => ({
+            label: background === "white" ? "Branco" : "Palha", active: offer.background === background, pick: () => set({ background }) }))} />
         </fieldset>
       </form>
 

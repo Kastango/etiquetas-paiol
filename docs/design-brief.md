@@ -97,13 +97,15 @@ A sombra das tigelas copia a dos PSDs: duas sombras projetadas em Multiplicaçã
 a 137°, 23% / distância 30 / tamanho 16 e 39% / 77 / 62, ambas com 8% de ruído (o granulado).
 
 Fotos: `public/products/index.json`, gerado de todos os PSDs por
-`scripts/extract-product-photos.py` (fotos repetidas entram uma vez). Fotos enviadas podem ter o
-fundo removido no navegador por ormbg (Apache-2.0) com Transformers.js num Web Worker: WebGPU em
+`scripts/extract-product-photos.py` (fotos repetidas entram uma vez). Fotos enviadas têm sempre o
+fundo removido no navegador (se o recorte falha, a foto entra inteira, aparada) por ormbg (Apache-2.0) com Transformers.js num Web Worker: WebGPU em
 fp16, ou WASM em 8 bits; o modelo vem do Hugging Face na primeira vez e fica no cache. Depois do
 modelo, o recorte mantém só o maior objeto, preenche o que ele envolve e corta as margens.
-Os links para Pexels, Unsplash, Freepik e Google buscam em inglês ("walnuts bowl top view"):
+Os links para Pexels e Unsplash, cujas licenças permitem os posts da loja, buscam em inglês ("walnuts bowl top view"):
 `src/lib/stock-search.ts` traduz o nome com um glossário de produtos naturais; produto novo que a
 loja passe a vender entra no glossário. Nome sem nenhuma palavra conhecida é buscado como digitado.
+O formulário fica enxuto, sem textos de ajuda: | na chamada e no nome quebra a linha e *palavra*
+destaca, como mostram as chamadas sugeridas; a prévia mostra a validade como sai no post.
 
 ## Horários
 

@@ -65,7 +65,7 @@ story 1080 × 1920. A prévia e o PNG usam o mesmo desenho.
 
 Foto do produto real, vista de cima, na tigela, sem distorção. O gerador traz as fotos dos
 posts antigos; para outra, envie a foto e deixe o site recortar o fundo, ou busque uma parecida
-no Pexels ou no Unsplash (no Freepik e no Google, confira a licença). O site desenha a mesma
+no Pexels ou no Unsplash, que permitem o uso nos posts. O site desenha a mesma
 sombra granulada dos posts originais.
 Nome, preço e unidade juntos. O preço anterior só aparece quando for maior que o
 da oferta. Faixa verde no rodapé com a chamada, a validade e a logo.
