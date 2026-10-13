@@ -1,6 +1,6 @@
 import { store } from "./brand";
 import { decimal } from "./products";
-import { marked, occasion, palette, unmarked } from "./occasions";
+import { PADRAO, marked, occasion, palette, unmarked } from "./occasions";
 
 export type OfferFormat = "square" | "portrait" | "story";
 export type OfferBackground = "white" | "palha";
@@ -31,22 +31,30 @@ interface Layout {
   band: { y: number; contentBottom: number; safeBottom?: number; style: "row" | "stack" };
   photo: Box; text: Box & { align: "left" | "center" };
   nameSize: number; headlineSize: number;
+  /**
+   * Dates of the year take a taller band, about 40% of a post as in the 2022 Christmas posts, with the
+   * photo and text moved up; the bowl may reach into the band, as it did there.
+   */
+  dated: { band: number; photo: Box; text: Box };
 }
 
 const MARGIN = 80;
 export const FORMATS: Record<OfferFormat, { label: string; ratio: string; layout: Layout }> = {
   square: { label: "Feed", ratio: "1:1", layout: {
     width: 1080, height: 1080, photo: { x: 475, y: 90, w: 555, h: 640 }, text: { x: MARGIN, y: 90, w: 375, h: 640, align: "left" },
-    band: { y: 800, contentBottom: 1080, style: "row" }, nameSize: 46, headlineSize: 112 } },
+    band: { y: 800, contentBottom: 1080, style: "row" }, nameSize: 46, headlineSize: 112,
+    dated: { band: 660, photo: { x: 475, y: 50, w: 555, h: 650 }, text: { x: MARGIN, y: 50, w: 375, h: 570 } } } },
   portrait: { label: "Retrato", ratio: "4:5", layout: {
     width: 1080, height: 1350, photo: { x: 140, y: 60, w: 800, h: 700 }, text: { x: MARGIN, y: 770, w: 920, h: 290, align: "left" },
-    band: { y: 1070, contentBottom: 1350, style: "row" }, nameSize: 54, headlineSize: 112 } },
+    band: { y: 1070, contentBottom: 1350, style: "row" }, nameSize: 54, headlineSize: 112,
+    dated: { band: 930, photo: { x: 140, y: 50, w: 800, h: 620 }, text: { x: MARGIN, y: 670, w: 920, h: 250 } } } },
   // Stories keep content out of the top 250 px, under Instagram's progress bar and profile name. The
   // band's block is centred in the whole band so the green looks balanced, but ends 150 px above the
   // bottom, clear of the reply bar on phones that draw it over the story.
   story: { label: "Story", ratio: "9:16", layout: {
     width: 1080, height: 1920, photo: { x: 150, y: 240, w: 780, h: 700 }, text: { x: MARGIN, y: 955, w: 920, h: 300, align: "center" },
-    band: { y: 1300, contentBottom: 1920, safeBottom: 1770, style: "stack" }, nameSize: 60, headlineSize: 128 } },
+    band: { y: 1300, contentBottom: 1920, safeBottom: 1770, style: "stack" }, nameSize: 60, headlineSize: 128,
+    dated: { band: 1180, photo: { x: 150, y: 240, w: 780, h: 620 }, text: { x: MARGIN, y: 860, w: 920, h: 300 } } } },
 };
 
 export const COLORS = { verde: "#347265", vinho: "#8D313B", palha: "#F0CDA2", texto: "#243C34", muted: "#6B7C75", fundoPalha: "#FBF1E4" };
@@ -156,8 +164,16 @@ function shadows(img: HTMLImageElement, w: number, h: number) {
   return entry;
 }
 
-export function drawOffer(ctx: CanvasRenderingContext2D, offer: Offer, format: OfferFormat, assets: OfferAssets) {
+/** The format's layout, with the taller band of the dates of the year. */
+export function layoutOf(format: OfferFormat, theme: string): Layout {
   const L = FORMATS[format].layout;
+  if (theme === PADRAO.id) return L;
+  const { band, photo, text } = L.dated;
+  return { ...L, photo, text: { ...text, align: L.text.align }, band: { ...L.band, y: band } };
+}
+
+export function drawOffer(ctx: CanvasRenderingContext2D, offer: Offer, format: OfferFormat, assets: OfferAssets) {
+  const L = layoutOf(format, offer.theme);
   const sans = (weight: number) => (size: number) => `${weight} ${size}px ${assets.sans}`;
   const display = (size: number) => `900 ${size}px ${assets.display}`;
   ctx.canvas.width = L.width;
@@ -166,6 +182,9 @@ export function drawOffer(ctx: CanvasRenderingContext2D, offer: Offer, format: O
   ctx.textAlign = "left";
   ctx.fillStyle = offer.background === "palha" ? COLORS.fundoPalha : "#FFFFFF";
   ctx.fillRect(0, 0, L.width, L.height);
+  // The band goes first so a bowl reaching into it is drawn over it.
+  ctx.fillStyle = palette(offer.theme, offer.palette).band;
+  ctx.fillRect(0, L.band.y, L.width, L.height - L.band.y);
 
   if (assets.photo) {
     const { photo: box } = L, img = assets.photo;
@@ -238,7 +257,7 @@ function drawMarked(ctx: CanvasRenderingContext2D, line: string, x: number, y: n
 }
 
 /**
- * The band, in the theme's colour. Positions come from the glyphs' measured bounds: the headline's
+ * The band's content, over the theme's colour. Positions come from the glyphs' measured bounds: the headline's
  * capitals and the validity's baseline delimit the block, and the logo is placed by its drawing, not its
  * image, whose SVG source pads the drawing by 8% of its height on every side. The headline takes up to
  * three lines, as large as fits the band's height.
@@ -246,8 +265,6 @@ function drawMarked(ctx: CanvasRenderingContext2D, line: string, x: number, y: n
 function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets: OfferAssets,
   sans: (weight: number) => (size: number) => string, display: (size: number) => string) {
   const { band } = L, theme = palette(offer.theme, offer.palette);
-  ctx.fillStyle = theme.band;
-  ctx.fillRect(0, band.y, L.width, L.height - band.y);
   const logo = assets.logo, ratio = logo.naturalWidth / logo.naturalHeight;
   const drawLogo = (left: number, top: number, height: number) => {
     const imageHeight = height * 1.16, pad = height * 0.08;
@@ -271,6 +288,11 @@ function drawBand(ctx: CanvasRenderingContext2D, offer: Offer, L: Layout, assets
   let head = fit(ctx, text, display, room, L.headlineSize, 40, 3);
   const headHeight = (size: number, lines: number) => size * (0.72 + 0.98 * (lines - 1) + 0.3) + validityCap;
   while (head.size > 40 && headHeight(head.size, head.lines.length) > height) head = fit(ctx, text, display, room, head.size - 2, 40, 3);
+  // Rather than wrap a line of its own ("Arraiá da / Paiol" into three), the headline shrinks by up to a quarter.
+  const breaks = text.split("|").filter(part => part.trim()).length;
+  let tidy = head;
+  while (tidy.lines.length > breaks && tidy.size > Math.max(40, head.size * 0.75)) tidy = fit(ctx, text, display, room, tidy.size - 2, 40, 3);
+  if (tidy.lines.length <= breaks) head = tidy;
   ctx.font = display(head.size);
   const headCap = metrics(ctx).cap, headLead = head.size * 0.98;
   const validityGap = head.size * 0.3;

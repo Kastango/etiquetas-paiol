@@ -73,8 +73,10 @@ Consumidor, Páscoa, os feriados nacionais, Dia das Mães, Namorados, Festa Juni
 das Crianças, Black Friday e Natal, listados pela próxima data (as móveis vêm da Páscoa ou do n-ésimo
 domingo do mês). Cada data traz uma paleta sugerida e uma alternativa no verde Paiol, chamadas
 sugeridas (botões abaixo do campo) e o emoji da legenda. Branco sobre a faixa tem 4,5:1 e o destaque
-3:1 (`occasions.test.ts`). A logo colorida, de telhado vinho, só vai nos verdes da marca; nas outras
-faixas, a branca, como o guia pede em fundos coloridos. Escolher uma data leva a validade para a
+3:1 (`occasions.test.ts`). Nas datas, a faixa cresce para perto de 40% do post, como no Natal de
+2022, e a foto e o texto sobem (`dated` em cada formato de `offer.ts`); a tigela pode encostar na
+faixa. A logo é a colorida, como naquele Natal; a branca só na faixa vinho, onde o telhado some. Uma
+chamada com quebras marcadas por | diminui até um quarto antes de ganhar uma linha a mais. Escolher uma data leva a validade para a
 véspera do feriado ou para o próprio dia, nunca um domingo (a loja fecha).
 
 O Natal segue os posts de dezembro de 2022 (PSDs "amendoas sem casca" e "storie natal paiol"):
