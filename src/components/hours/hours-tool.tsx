@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Check, Copy, Download, FileText, Loader2, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { Check, Copy, Download, FileText, Loader2, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ClientOnly } from "@/components/client-only";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { downloadBlob } from "@/lib/download";
 import { poppins } from "@/lib/fonts";
 import { HOURS_FORMATS, defaultHours, drawHours, hoursText, withTheme, type Hours, type HoursAssets, type HoursFormat, type HoursRow } from "@/lib/hours";
 import { OccasionPicker } from "@/components/occasion-picker";
-import { LOGOS, PADRAO, hoursSample, occasion, palette } from "@/lib/occasions";
+import { LOGOS, hoursSample, occasion, palette } from "@/lib/occasions";
 import { cn } from "@/lib/utils";
 
 const DRAFT_KEY = "hours-draft";
@@ -50,18 +50,16 @@ function HoursEditor() {
   const set = (changes: Partial<Hours>) => setHours(h => ({ ...h, ...changes }));
   const setRow = (index: number, changes: Partial<HoursRow>) =>
     setHours(h => ({ ...h, rows: h.rows.map((row, i) => (i === index ? { ...row, ...changes } : row)) }));
-  const move = (index: number, to: number) => setHours(h => {
-    const rows = [...h.rows];
-    [rows[index], rows[to]] = [rows[to], rows[index]];
-    return { ...h, rows };
-  });
+  // Back to the theme's text: the store's hours, or the date's suggestion.
+  const restore = () => window.confirm("Desfazer as mudanças no texto?")
+    && set({ ...hoursSample(occasion(hours.theme)), whatsapp: defaultHours().whatsapp });
 
   useEffect(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(hours)), [hours]);
 
   const logo = LOGOS[palette(hours.theme, hours.palette).logo], lights = occasion(hours.theme).lights;
   useEffect(() => {
     let cancelled = false;
-    const fonts = Promise.all([400, 500, 600].map(w => document.fonts.load(`${w} 40px ${poppins.style.fontFamily}`, "Horário Sábado 8h30 Áá")));
+    const fonts = Promise.all([400, 600, 700].map(w => document.fonts.load(`${w} 40px ${poppins.style.fontFamily}`, "Horário Sábado 8h30 Áá")));
     Promise.all([fonts, loadImage(logo), lights ? loadImage(lights) : null])
       .then(([, logo, lights]) => { if (!cancelled) setAssets({ logo, lights, sans: poppins.style.fontFamily }); })
       .catch(() => toast.error("Não foi possível carregar a logo. Recarregue a página."));
@@ -102,19 +100,7 @@ function HoursEditor() {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
       <form className="min-w-0 space-y-6" onSubmit={e => e.preventDefault()}>
-        <div className="space-y-2">
-          <OccasionPicker theme={hours.theme} palette={hours.palette} onTheme={id => setHours(h => withTheme(h, id))} onPalette={index => set({ palette: index })} />
-          {hours.theme !== PADRAO.id && (
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-muted-foreground">
-                {occasion(hours.theme).holiday ? "Texto sugerido para o feriado: confira os horários com a loja." : "Horário de sempre, com uma mensagem da data."}
-              </p>
-              <Button type="button" variant="ghost" size="sm" onClick={() => set(hoursSample(occasion(hours.theme)))}>
-                <RotateCcw /> Usar texto sugerido
-              </Button>
-            </div>
-          )}
-        </div>
+        <OccasionPicker theme={hours.theme} palette={hours.palette} onTheme={id => setHours(h => withTheme(h, id))} onPalette={index => set({ palette: index })} />
 
         <div className="space-y-1.5">
           <Label htmlFor="hours-title">Título</Label>
@@ -129,12 +115,6 @@ function HoursEditor() {
                 <div className="flex items-center gap-1">
                   <Label htmlFor={`days-${index}`} className="sr-only">Dias, linha {index + 1}</Label>
                   <Input id={`days-${index}`} placeholder="Segunda a sexta" value={row.days} onChange={e => setRow(index, { days: e.target.value })} />
-                  <button type="button" className={iconButton} aria-label={`Subir ${row.days || "a linha"}`} disabled={index === 0} onClick={() => move(index, index - 1)}>
-                    <ArrowUp className="size-4" />
-                  </button>
-                  <button type="button" className={iconButton} aria-label={`Descer ${row.days || "a linha"}`} disabled={index === hours.rows.length - 1} onClick={() => move(index, index + 1)}>
-                    <ArrowDown className="size-4" />
-                  </button>
                   <button type="button" className={cn(iconButton, "hover:text-destructive")} aria-label={`Apagar ${row.days || "a linha"}`}
                     onClick={() => set({ rows: hours.rows.filter((_, i) => i !== index) })}>
                     <Trash2 className="size-4" />
@@ -146,7 +126,6 @@ function HoursEditor() {
               </li>
             ))}
           </ol>
-          <p className="text-xs text-muted-foreground">Enter no horário quebra a linha no cartaz.</p>
           <Button type="button" variant="outline" onClick={() => set({ rows: [...hours.rows, { days: "", hours: "" }] })}>
             <Plus /> Adicionar dia
           </Button>
@@ -156,17 +135,15 @@ function HoursEditor() {
           <Label htmlFor="hours-note">Aviso</Label>
           <textarea id="hours-note" rows={2} placeholder="Feriado de 2 de novembro: fechado" className={cn(inputClassName, "h-auto resize-none")}
             value={hours.note} onChange={e => set({ note: e.target.value })} />
-          <p className="text-xs text-muted-foreground">Opcional. Aparece em destaque, abaixo dos horários.</p>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="hours-whatsapp">WhatsApp</Label>
-          <Input id="hours-whatsapp" inputMode="tel" placeholder="Deixe vazio para não mostrar" value={hours.whatsapp} onChange={e => set({ whatsapp: e.target.value })} />
+          <Input id="hours-whatsapp" inputMode="tel" value={hours.whatsapp} onChange={e => set({ whatsapp: e.target.value })} />
         </div>
 
-        <Button type="button" variant="ghost" className="text-muted-foreground"
-          onClick={() => window.confirm("Voltar ao horário de sempre da loja? As mudanças daqui se perdem.") && setHours(defaultHours())}>
-          <RotateCcw /> Voltar ao horário da loja
+        <Button type="button" variant="ghost" className="text-muted-foreground" onClick={restore}>
+          <RotateCcw /> Restaurar texto
         </Button>
       </form>
 

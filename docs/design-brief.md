@@ -68,7 +68,7 @@ No feed e no retrato, a logo tem a altura do bloco "Oferta" + validade; no story
 centralizado: o bloco da faixa verde fica no meio da faixa inteira, para o verde não sobrar embaixo,
 mas termina 150 px acima da base (barra de resposta); nada entra nos 250 px do topo.
 
-Tema Padrão ou uma data comemorativa (`src/lib/occasions.ts`): Ano Novo, Carnaval, Dia do
+Tema Padrão ou uma data comemorativa, numa só lista com o Padrão em primeiro (`src/lib/occasions.ts`): Ano Novo, Carnaval, Dia do
 Consumidor, Páscoa, os feriados nacionais, Dia das Mães, Namorados, Festa Junina, Dia dos Pais, Dia
 das Crianças, Black Friday e Natal, listados pela próxima data (as móveis vêm da Páscoa ou do n-ésimo
 domingo do mês). Cada data traz uma paleta sugerida e uma alternativa no verde Paiol, chamadas
@@ -108,10 +108,12 @@ Cartaz de horário de funcionamento a partir do modelo que a loja usava no Canva
 logo sobre verde, o título em maiúsculas sobre um fio verde, cada linha com os dias em Poppins 400 e
 o horário em Poppins 600, e o WhatsApp no canto de baixo, com o ícone do Simple Icons (CC0). O antigo
 "PAIOL" em maiúsculas foi trocado pela logo do kit. Linhas, título, aviso (em vinho, para feriados) e
-WhatsApp são editáveis; o rascunho fica no localStorage (`hours-draft`) e há um botão para voltar ao
-horário da loja. O renderer Canvas (`src/lib/hours.ts`) desenha numa largura de 1080 e escala para
+WhatsApp são editáveis; o rascunho fica no localStorage (`hours-draft`) e "Restaurar texto" volta ao
+texto do tema (o horário da loja, ou o sugerido da data). O formulário fica enxuto, sem textos de
+ajuda: tema, título, linhas, aviso e WhatsApp. O renderer Canvas (`src/lib/hours.ts`) desenha numa largura de 1080 e escala para
 A4 (2480 × 3508, 300 dpi, também em PDF de uma página), feed 4:5 e story 9:16, este com a logo abaixo
-dos 250 px do topo e o WhatsApp acima dos 150 px de baixo. As linhas ficam centradas entre o fio e o
+dos 250 px do topo e o WhatsApp acima dos 150 px de baixo. O número do WhatsApp é Poppins 700, perto
+da espessura do ícone, e fica tão acima da base quanto as maiúsculas do título ficam abaixo da faixa. As linhas ficam centradas entre o fio e o
 WhatsApp, mas nunca mais que 100 unidades abaixo do fio: num feriado de uma linha só, o texto fica
 junto do título e a sobra vai para baixo. Se não cabem, o espaço entre elas fecha até 60% antes de as letras diminuírem. O texto
 para copiar segue o tom da marca e termina com o endereço da loja. Com uma data
@@ -119,7 +121,7 @@ comemorativa, faixa, fio, ícone e aviso ficam na cor da data e a logo segue a r
 O texto sugerido de um feriado lista os dias, com o feriado fechado (e os dias em volta, no Natal,
 Ano Novo, Carnaval e Páscoa, como exemplo a conferir), e diz quando a loja reabre, pulando o domingo;
 nas outras datas, o horário de sempre com uma mensagem. Trocar de tema só troca o texto que ainda
-está no sugerido do tema anterior; "Usar texto sugerido" aplica o da data de propósito.
+está no sugerido do tema anterior; "Restaurar texto" aplica o da data de propósito.
 
 ## Manutenção
 

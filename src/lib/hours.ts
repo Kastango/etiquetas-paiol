@@ -95,10 +95,12 @@ export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: H
   ctx.fillStyle = accent;
   ctx.fillRect(MARGIN, rule, width, 5);
 
-  // WhatsApp: logo over the number, right-aligned.
-  let bottom = H - F.safeBottom - 72;
+  // WhatsApp: logo over the number, right-aligned. The number is bold, near the weight of the logo's ring,
+  // and sits as far above the bottom as the title's capitals sit below the band.
+  ctx.font = font(400, 41);
+  let bottom = H - F.safeBottom - (titleY - band - ctx.measureText("H").actualBoundingBoxAscent);
   if (hours.whatsapp.trim()) {
-    ctx.font = font(500, 50);
+    ctx.font = font(700, 50);
     ctx.textAlign = "right";
     ctx.fillStyle = COLORS.texto;
     ctx.fillText(hours.whatsapp.trim(), W - MARGIN, bottom);
