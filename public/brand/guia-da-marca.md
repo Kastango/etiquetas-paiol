@@ -87,9 +87,9 @@ da atual, com cerca de 45 cm até o telhado e 25 cm até o toldo. Logo horizonta
 - Placa verde Paiol: mais sóbria; perde contraste na parede turquesa à distância.
 - Parede no verde Paiol: placa branca, parede e toldo pintados no verde da marca.
 
-Placa de bandeira: a caixa quadrada da coluna ao lado da porta. Face de 80 × 80 cm com a logo
-empilhada (60% da altura) e o WhatsApp no lugar do telefone fixo; branca (recomendada, se
-destaca na parede verde) ou verde Paiol. Lona ou acrílico translúcido, nas duas faces.
+Placa de bandeira: a caixa quadrada da coluna ao lado da porta. Face branca de 80 × 80 cm, sem
+telefone, com a logo empilhada (o nome maior, melhor leitura) ou o selo (mais limpa; o nome já
+está na fachada). Lona ou acrílico translúcido, nas duas faces.
 
 Meça as placas e ajuste a arte sem distorcer a logo. Material da fachada: ACM com adesivo
 vinílico impresso. Peça prova do verde e confira à luz do dia.

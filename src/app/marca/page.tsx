@@ -321,15 +321,15 @@ export default function BrandPage() {
 
         <h3 className="mt-12 font-semibold">Placa de bandeira</h3>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          A caixa quadrada na coluna ao lado da porta, vista de quem passa na calçada. Troca só a face: logo empilhada e o WhatsApp
-          no lugar do telefone antigo.
+          A caixa quadrada na coluna ao lado da porta, vista de quem passa na calçada. Troca só a face, branca, sem telefone:
+          a logo empilhada ou o selo.
         </p>
         <MockupRow before={{ src: "/brand/fachada/bandeira-atual.jpg", alt: "Placa de bandeira atual, quadrada, com a logo antiga e um telefone fixo" }}
           options={boxSign} focus="object-center" />
         <SignSpecs specs={[
           ["Medida", "Arte quadrada de 80 × 80 cm, em milímetros. Meça a face da caixa e ajuste mantendo o quadrado."],
-          ["Logo", "Empilhada, como no cartão, com 60% da altura da face. O WhatsApp vai embaixo, em contorno."],
-          ["Leitura", "O nome fica com cerca de 11 cm de altura; para a calçada e para quem passa de carro devagar."],
+          ["Logo", "Empilhada, com 66% da altura da face, ou o selo, com 70%: sobra em volta o respiro de um décimo do selo."],
+          ["Leitura", "Na logo, o nome fica com cerca de 12 cm de altura; para a calçada e para quem passa de carro devagar."],
           ["Material", "Lona ou acrílico translúcido para caixa iluminada, nas duas faces da bandeira."],
         ]} />
       </Section>

@@ -1,7 +1,7 @@
 """Storefront sign artwork and mockups on photos of the current signs.
 
 Run after extract-brand-assets.py, which draws the logo lockups used here and rebuilds the kit ZIP this adds to:
-uv run --with pillow --with numpy --with fonttools scripts/make-facade-mockups.py
+uv run --with pillow --with numpy scripts/make-facade-mockups.py
 
 Photos in scripts/sources: fachada-google.jpg (960 × 1280, Google Business profile) for the wall sign,
 and placa-bandeira-streetview.png (Street View) for the projecting box sign. The corners below are
@@ -13,9 +13,6 @@ import subprocess
 import zipfile
 from pathlib import Path
 import numpy as np
-from fontTools.pens.svgPathPen import SVGPathPen
-from fontTools.pens.transformPen import TransformPen
-from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFilter
 
 root = Path(__file__).resolve().parents[1]
@@ -23,7 +20,6 @@ sources = Path(__file__).parent / "sources"
 brand = root / "public/brand"
 out = brand / "fachada"
 out.mkdir(parents=True, exist_ok=True)
-WHATSAPP = "WhatsApp (46) 92001-1470"
 
 
 def homography(src, dst):
@@ -51,18 +47,6 @@ def lockup(file, x, y, height):
     return f'<svg x="{x - box_w / 2:.1f}" y="{y - box_h / 2:.1f}" width="{box_w:.1f}" height="{box_h:.1f}" viewBox="{view}">{inner}</svg>'
 
 
-def text_path(text, font_file, size, centre_x, baseline, fill):
-    """Text as outlines, so print shops need no fonts installed."""
-    font = TTFont(root / "public/fonts" / font_file)
-    glyphs, cmap = font.getGlyphSet(), font.getBestCmap()
-    scale = size / font["head"].unitsPerEm
-    width = sum(glyphs[cmap[ord(c)]].width for c in text) * scale
-    pen, x = SVGPathPen(glyphs), centre_x - width / 2
-    for c in text:
-        name = cmap[ord(c)]
-        glyphs[name].draw(TransformPen(pen, (scale, 0, 0, -scale, x, baseline)))
-        x += glyphs[name].width * scale
-    return f'<path fill="{fill}" d="{pen.getCommands()}"/>'
 
 
 def svg(width, height, title, body):
@@ -147,31 +131,24 @@ def wall_sign(background, border, text, suffix):
 
 
 # --- Projecting box sign ---------------------------------------------------------------------------
-# A square light box on the column by the door, seen from the side: its front face and the box side.
+# A square light box on the column by the door, seen from the side: its front face.
 BOX_FRONT = [(294, 284), (462, 260), (462, 579), (294, 597)]
-BOX_SIDE = [(462, 260), (571, 258), (572, 591), (462, 579)]
 S = 800  # mm, square
 
 
-def box_sign(background, border, text, suffix):
-    body = (f'<rect width="{S}" height="{S}" fill="{background}"/>'
-            f'<rect x="8" y="8" width="{S - 16}" height="{S - 16}" fill="none" stroke="{border}" stroke-width="16"/>'
-            + lockup(f"paiol-stacked-{suffix}", S / 2, S * 0.42, S * 0.6)
-            + text_path(WHATSAPP, "Poppins-600.ttf", S * 0.052, S / 2, S * 0.86, text))
+# White, without the WhatsApp: the stacked logo, or the seal with the name round the barn. The seal's drawing is 70%
+# of the face, which leaves it the seal's clear space of a tenth of its diameter inside the border.
+BOX_SIGNS = {"logo": ("paiol-stacked-color", 0.66), "selo": ("paiol-seal-color", 0.7)}
+
+
+def box_sign(file, height):
+    white = COLOURS["branca"]
+    body = (f'<rect width="{S}" height="{S}" fill="{white["background"]}"/>'
+            f'<rect x="8" y="8" width="{S - 16}" height="{S - 16}" fill="none" stroke="{white["border"]}" stroke-width="16"/>'
+            + lockup(file, S / 2, S / 2, S * height))
     return svg(S, S, "Placa de bandeira Paiol, 80 × 80 cm", body)
 
 
-def paint_side(photo, quad, rgb):
-    """Recolour the box side in the panel colour, keeping the photo's shading."""
-    mask = Image.new("L", photo.size, 0)
-    ImageDraw.Draw(mask).polygon(quad, fill=255)
-    lum = np.asarray(photo.convert("L"), dtype=np.float32)[..., None] / 255
-    inside = np.asarray(mask) > 0
-    shade = lum / np.percentile(lum[inside], 90)
-    painted = np.clip(np.array(rgb, dtype=np.float32) * shade, 0, 255).astype(np.uint8)
-    result = photo.copy()
-    result.paste(Image.fromarray(painted), (0, 0), mask.filter(ImageFilter.GaussianBlur(0.7)))
-    return result
 
 
 facade = Image.open(sources / "fachada-google.jpg").convert("RGB")
@@ -190,13 +167,13 @@ for name, colours in COLOURS.items():
     if name == "branca":
         place(repaint(facade), art, NEW_SIGN, OLD_SIGN).crop(facade_crop).save(out / "fachada-verde-paiol.jpg", quality=88)
 
-    data = box_sign(**colours)
+for name, (file, height) in BOX_SIGNS.items():
+    data = box_sign(file, height)
     (out / f"bandeira-{name}.svg").write_text(data)
     art = rasterize(data, 1200)
     art.save(out / f"bandeira-{name}.png", optimize=True)
-    base = street if name == "branca" else paint_side(street, BOX_SIDE, (52, 114, 101))
     # Street View is soft; a little blur keeps the new face from looking pasted on.
-    place(base, art, BOX_FRONT, blur=0.6, hazy=True).crop(street_crop).save(out / f"bandeira-{name}.jpg", quality=90)
+    place(street, art, BOX_FRONT, blur=0.6, hazy=True).crop(street_crop).save(out / f"bandeira-{name}.jpg", quality=90)
 
 with zipfile.ZipFile(brand / "paiol-brand-kit.zip", "a", zipfile.ZIP_DEFLATED) as archive:
     names = set(archive.namelist())

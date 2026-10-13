@@ -151,7 +151,7 @@ As duas são gratuitas (SIL Open Font License) e vêm na pasta `fonts` do brand 
   dias em Poppins Regular e horários em Poppins Semibold verde escuro, aviso de feriado em vinho e o WhatsApp embaixo.
 - **Placas da fachada**: a arte pronta está na pasta `fachada` do kit (SVG em milímetros). Placa da fachada de
   5,7 × 1,7 m, branca (recomendada) ou verde, com a logo horizontal com assinatura; placa de bandeira quadrada de
-  80 × 80 cm com a logo empilhada e o WhatsApp.
+  80 × 80 cm, branca e sem telefone, com a logo empilhada ou o selo.
 - **Outra peça** (cartaz, aviso, apresentação, embalagem): fundo branco ou palha; verde Paiol em faixas ou blocos; uma
   chamada curta em Fraunces; texto em Poppins verde escuro; preço em vinho; a logo inteira, com respiro, num canto ou
   numa faixa verde; foto do produto real.

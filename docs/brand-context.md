@@ -62,7 +62,8 @@ O guia corrige o que estas legendas escorregam: "Paiol" com P maiúsculo e conco
 - Respiro: a altura do paiol em cada lado. Exceção só em placas, onde a borda faz o respiro.
 - Posts: 1:1, 4:5 e 9:16. O horizontal 16:9 foi recusado.
 - Placas: fachada e placa de bandeira (a caixa quadrada da coluna), como modelos no kit; sem
-  gerador de placas. A placa da fachada deve ser maior que a atual, usando a parede vazia, com a
+  gerador de placas. A bandeira é só branca e sem WhatsApp, em duas versões aprovadas: logo
+  empilhada e selo (outubro de 2026); a verde e o número escrito ou com ícone foram recusados. A placa da fachada deve ser maior que a atual, usando a parede vazia, com a
   logo centralizada e folga em volta.
 - Sem login nem banco: o acesso é pelo link, os dados ficam no navegador.
 

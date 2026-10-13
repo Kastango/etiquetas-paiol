@@ -128,12 +128,12 @@ export const facade = [
 
 /** The square light box on the column by the door, seen in Street View. */
 export const boxSign = [
-  { name: "Bandeira branca", mockup: "bandeira-branca", art: "bandeira-branca", recommended: true,
-    alt: "Placa de bandeira quadrada branca com a logo empilhada e o WhatsApp",
-    text: "Se destaca na parede verde atrás dela e funciona acesa à noite." },
-  { name: "Bandeira verde Paiol", mockup: "bandeira-verde", art: "bandeira-verde", recommended: false,
-    alt: "Placa de bandeira quadrada verde Paiol com a logo empilhada e o WhatsApp",
-    text: "Igual ao cartão de visitas. Contra a parede verde, se apoia mais na luz da caixa." },
+  { name: "Logo", mockup: "bandeira-logo", art: "bandeira-logo", recommended: false,
+    alt: "Placa de bandeira quadrada branca com a logo empilhada",
+    text: "O nome grande, o que melhor se lê da rua." },
+  { name: "Selo", mockup: "bandeira-selo", art: "bandeira-selo", recommended: false,
+    alt: "Placa de bandeira quadrada branca com o selo: o paiol no centro e o nome em volta",
+    text: "Mais limpa: de longe se reconhece o paiol, e o nome já está na placa da fachada." },
 ];
 
 export interface Photo { name: string; src: string; keywords: string[] }

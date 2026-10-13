@@ -37,7 +37,7 @@ Depois, a arte e os mockups das placas (sobre as fotos em `scripts/sources/`), q
 no ZIP do kit:
 
 ```bash
-uv run --with pillow --with numpy --with fonttools scripts/make-facade-mockups.py
+uv run --with pillow --with numpy scripts/make-facade-mockups.py
 ```
 
 As larguras das letras da Poppins que o PDF de etiquetas usa para encaixar os nomes
