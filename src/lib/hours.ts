@@ -52,7 +52,7 @@ const filled = (rows: HoursRow[]) => rows.filter(row => row.days.trim() || row.h
 /**
  * The sign of the Canva template: a band in the theme's colour with the logo, the title over a green rule, each row's days
  * over its hours, and the WhatsApp at the bottom right. The rows are centred between the rule and the
- * WhatsApp; when they do not fit, the space between them closes up first, then the letters shrink.
+ * WhatsApp, at most 100 units under the rule; when they do not fit, the space between them closes up first, then the letters shrink.
  */
 export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: HoursFormat, assets: HoursAssets) {
   const F = HOURS_FORMATS[format], scale = F.width / W, H = F.height / scale;
@@ -135,7 +135,10 @@ export function drawHours(ctx: CanvasRenderingContext2D, hours: Hours, format: H
   const room = bottom - rule - 2 * 60;
   const g = spaces ? Math.max(0.6, Math.min(1, (room - text) / spaces)) : 1;
   const k = Math.min(1, room / Math.max(text + spaces * g, 1), width / Math.max(widest, 1));
-  let y = rule + (bottom - rule - (text + spaces * g) * k) / 2 + (rows.length ? size.day : size.note) * 0.7 * k;
+  // Centred, but no further below the rule than in the usual sign, so a short holiday sign keeps its text
+  // under the title and leaves the space above the WhatsApp.
+  const above = Math.min((bottom - rule - (text + spaces * g) * k) / 2, 100);
+  let y = rule + above + (rows.length ? size.day : size.note) * 0.7 * k;
 
   ctx.textAlign = "left";
   rows.forEach((row, i) => {

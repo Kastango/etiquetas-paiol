@@ -112,7 +112,8 @@ WhatsApp são editáveis; o rascunho fica no localStorage (`hours-draft`) e há 
 horário da loja. O renderer Canvas (`src/lib/hours.ts`) desenha numa largura de 1080 e escala para
 A4 (2480 × 3508, 300 dpi, também em PDF de uma página), feed 4:5 e story 9:16, este com a logo abaixo
 dos 250 px do topo e o WhatsApp acima dos 150 px de baixo. As linhas ficam centradas entre o fio e o
-WhatsApp; se não cabem, o espaço entre elas fecha até 60% antes de as letras diminuírem. O texto
+WhatsApp, mas nunca mais que 100 unidades abaixo do fio: num feriado de uma linha só, o texto fica
+junto do título e a sobra vai para baixo. Se não cabem, o espaço entre elas fecha até 60% antes de as letras diminuírem. O texto
 para copiar segue o tom da marca e termina com o endereço da loja. Com uma data
 comemorativa, faixa, fio, ícone e aviso ficam na cor da data e a logo segue a regra das ofertas.
 O texto sugerido de um feriado lista os dias, com o feriado fechado (e os dias em volta, no Natal,
