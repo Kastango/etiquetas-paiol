@@ -14,8 +14,8 @@ import { useCopy } from "@/lib/clipboard";
 import { downloadBlob } from "@/lib/download";
 import { fraunces, poppins } from "@/lib/fonts";
 import { OccasionPicker } from "@/components/occasion-picker";
-import { FORMATS, caption, drawOffer, inAWeek, isoDate, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
-import { LOGOS, PADRAO, occasion, offerUntil, palette, unmarked } from "@/lib/occasions";
+import { FORMATS, caption, drawOffer, inAWeek, isoDate, offerLogo, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
+import { LOGOS, PADRAO, occasion, offerUntil, unmarked } from "@/lib/occasions";
 import { UNITS, currency } from "@/lib/products";
 import { cn, slug } from "@/lib/utils";
 import { PhotoPicker } from "./photo-picker";
@@ -24,6 +24,7 @@ const DRAFT_KEY = "offer-draft";
 const example = (): Offer => ({
   name: "Nozes chilenas quebradas", price: 4.79, oldPrice: 5, unit: "100g",
   headline: PADRAO.headlines[0], until: inAWeek(), background: "white", theme: PADRAO.id, palette: 0,
+  logo: "auto", priceColour: "date",
 });
 
 function loadImage(src: string) {
@@ -48,6 +49,24 @@ function Field({ id, label, hint, children }: { id: string; label: string; hint?
       <Label htmlFor={id}>{label}</Label>
       {children}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+/** A small labelled group of buttons, one of them chosen. */
+function Choice({ label, options }: { label: string; options: { label: string; active: boolean; pick: () => void }[] }) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-sm font-medium leading-none">{label}</p>
+      <div role="radiogroup" aria-label={label} className="grid grid-cols-2 rounded-lg border bg-card p-1">
+        {options.map(option => (
+          <button key={option.label} type="button" role="radio" aria-checked={option.active} onClick={option.pick}
+            className={cn("min-h-8 rounded-md px-2 py-1 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
+              option.active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+            {option.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -89,7 +108,7 @@ function OfferEditor() {
   useEffect(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(offer)), [offer]);
 
   // Reloads fonts, the theme's logo and lights, and the photo; uploaded photos are object URLs that live only in memory.
-  const logo = LOGOS[palette(offer.theme, offer.palette).logo], lights = occasion(offer.theme).lights;
+  const logo = LOGOS[offerLogo(offer)], lights = occasion(offer.theme).lights;
   useEffect(() => {
     let cancelled = false;
     Promise.all([loadFonts(), loadImage(logo), lights ? loadImage(lights) : null, loadImage(photoSrc).catch(() => null)])
@@ -109,7 +128,7 @@ function OfferEditor() {
     const until = offer.until === null ? null
       : id === PADRAO.id ? (offer.until === offerUntil(old) ? inAWeek() : offer.until)
       : offerUntil(next) ?? offer.until;
-    set({ theme: id, palette: 0, until, headline: old.headlines.includes(offer.headline) ? next.headlines[0] : offer.headline });
+    set({ theme: id, palette: 0, logo: "auto", until, headline: old.headlines.includes(offer.headline) ? next.headlines[0] : offer.headline });
   };
 
   useEffect(() => {
@@ -141,7 +160,17 @@ function OfferEditor() {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
       <form className="min-w-0 space-y-6" onSubmit={e => e.preventDefault()}>
-        <OccasionPicker theme={offer.theme} palette={offer.palette} onTheme={pickTheme} onPalette={index => set({ palette: index })} />
+        <div className="space-y-3">
+          <OccasionPicker theme={offer.theme} palette={offer.palette} onTheme={pickTheme} onPalette={index => set({ palette: index, logo: "auto" })} />
+          {offer.theme !== PADRAO.id && (
+            <div className="grid grid-cols-2 gap-3">
+              <Choice label="Logo" options={(["color", "white"] as const).map(logo => ({
+                label: logo === "color" ? "Colorida" : "Branca", active: offerLogo(offer) === logo, pick: () => set({ logo }) }))} />
+              <Choice label="Cor do preço" options={(["date", "vinho"] as const).map(priceColour => ({
+                label: priceColour === "date" ? "Da data" : "Vinho", active: offer.priceColour === priceColour, pick: () => set({ priceColour }) }))} />
+            </div>
+          )}
+        </div>
 
         <fieldset className="space-y-4">
           <legend className="pb-2 font-semibold">Produto</legend>

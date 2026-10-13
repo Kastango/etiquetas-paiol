@@ -1,6 +1,6 @@
 import { store } from "./brand";
 import { decimal } from "./products";
-import { PADRAO, marked, occasion, palette, unmarked } from "./occasions";
+import { PADRAO, logoFor, marked, occasion, palette, unmarked, type LogoChoice } from "./occasions";
 
 export type OfferFormat = "square" | "portrait" | "story";
 export type OfferBackground = "white" | "palha";
@@ -16,6 +16,10 @@ export interface Offer {
   /** Padrão or a date of the year (occasions.ts), and the index of its palette. */
   theme: string;
   palette: number;
+  /** The logo on the band: chosen by its colour (logoFor), or set by hand when the colour one reads poorly. */
+  logo: "auto" | LogoChoice;
+  /** On a date, the price in the band's colour or in the brand's vinho; Padrão keeps vinho. */
+  priceColour: "date" | "vinho";
 }
 /** `logo` and `lights` are the theme's. */
 export interface OfferAssets { photo: HTMLImageElement | null; logo: HTMLImageElement; lights: HTMLImageElement | null; sans: string; display: string }
@@ -56,6 +60,14 @@ export const FORMATS: Record<OfferFormat, { label: string; ratio: string; layout
     band: { y: 1300, contentBottom: 1920, safeBottom: 1770, style: "stack" }, nameSize: 60, headlineSize: 128,
     dated: { band: 1180, photo: { x: 150, y: 240, w: 780, h: 620 }, text: { x: MARGIN, y: 860, w: 920, h: 300 } } } },
 };
+
+/** The logo version the offer's band takes. */
+export const offerLogo = (offer: Pick<Offer, "logo" | "theme" | "palette">): LogoChoice =>
+  offer.logo === "auto" ? logoFor(palette(offer.theme, offer.palette).band) : offer.logo;
+
+/** The price's colour: vinho, or on a date, the band's colour, which keeps the 3:1 of large text on both backgrounds (offer.test.ts). */
+export const priceColour = (offer: Pick<Offer, "priceColour" | "theme" | "palette">) =>
+  offer.theme !== PADRAO.id && offer.priceColour === "date" ? palette(offer.theme, offer.palette).band : COLORS.vinho;
 
 export const COLORS = { verde: "#347265", vinho: "#8D313B", palha: "#F0CDA2", texto: "#243C34", muted: "#6B7C75", fundoPalha: "#FBF1E4" };
 
@@ -230,7 +242,7 @@ export function drawOffer(ctx: CanvasRenderingContext2D, offer: Offer, format: O
   const unitGap = unitSize * 0.4, unitWidth = offer.unit ? unitGap + ctx.measureText(offer.unit).width : 0;
   const priceX = centred ? anchor - (priceWidth + unitWidth) / 2 : anchor;
   ctx.font = sans(800)(priceSize);
-  ctx.fillStyle = COLORS.vinho;
+  ctx.fillStyle = priceColour(offer);
   ctx.fillText(price, priceX, y - priceSize * 0.08);
   if (offer.unit) {
     ctx.font = sans(500)(unitSize);

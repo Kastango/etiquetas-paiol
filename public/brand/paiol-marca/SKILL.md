@@ -142,7 +142,7 @@ As duas são gratuitas (SIL Open Font License) e vêm na pasta `fonts` do brand 
   nome em Poppins Bold verde escuro; preço em Poppins ExtraBold vinho, com a unidade; faixa verde no rodapé com a
   chamada em Fraunces, a validade e a logo sobre verde. No story, nada nos 250 px do topo. Em datas comemorativas
   (Natal, Páscoa, Dia das Mães, Black Friday e outras), a faixa fica maior (perto de 40% do post), ganha a cor da
-  data com a logo colorida (a branca só na faixa vinho, onde o telhado some) e uma palavra da chamada em destaque, como "Oferta *especial* de Natal" no vermelho #D9363C com "especial" em amarelo #FECC55.
+  data com a logo colorida (a branca quando a faixa esconde o telhado vinho), o preço na cor da data ou em vinho e uma palavra da chamada em destaque, como "Oferta *especial* de Natal" no vermelho #D9363C com "especial" em amarelo #FECC55.
   Essas cores são só das datas; não entram na paleta.
 - **Etiqueta de balcão**: sai da página Etiquetas do site, em PDF A4. Etiquetas de 65 × 30 mm e 95 × 30 mm, ou de um
   tipo com outro tamanho criado ali; verde Paiol, texto branco em Poppins.

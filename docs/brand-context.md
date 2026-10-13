@@ -54,7 +54,8 @@ O guia corrige o que estas legendas escorregam: "Paiol" com P maiúsculo e conco
   cada uma com paleta, chamadas e textos sugeridos. O modelo é o Natal de dezembro de 2022 (faixa
   vermelha, "Oferta especial de Natal" com "especial" em amarelo, cordão de luzes), ajustado à marca
   de hoje: chamada em Fraunces e vermelho #D9363C pelo contraste. Como lá, a faixa ocupa perto de
-  40% do post e leva a logo colorida; a branca fica só na faixa vinho, onde o telhado some.
+  40% do post e leva a logo colorida; a branca entra quando a faixa esconde o telhado vinho (Consumidor,
+  Mães, Namorados), e o post deixa trocar. O preço vai na cor da data, ou em vinho, a escolher.
   As cores das datas não entram na paleta da marca.
 - Monocromática verde e preta: tons sólidos do desenho original. A versão com porta e janela
   vazadas e frestas em todas as faces foi recusada. A branca é sólida, com frestas só no

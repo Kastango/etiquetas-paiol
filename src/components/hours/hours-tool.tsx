@@ -12,7 +12,7 @@ import { downloadBlob } from "@/lib/download";
 import { poppins } from "@/lib/fonts";
 import { HOURS_FORMATS, defaultHours, drawHours, hoursText, withTheme, type Hours, type HoursAssets, type HoursFormat, type HoursRow } from "@/lib/hours";
 import { OccasionPicker } from "@/components/occasion-picker";
-import { LOGOS, hoursSample, occasion, palette } from "@/lib/occasions";
+import { LOGOS, hoursSample, logoFor, occasion, palette } from "@/lib/occasions";
 import { cn } from "@/lib/utils";
 
 const DRAFT_KEY = "hours-draft";
@@ -56,7 +56,7 @@ function HoursEditor() {
 
   useEffect(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(hours)), [hours]);
 
-  const logo = LOGOS[palette(hours.theme, hours.palette).logo], lights = occasion(hours.theme).lights;
+  const logo = LOGOS[logoFor(palette(hours.theme, hours.palette).band)], lights = occasion(hours.theme).lights;
   useEffect(() => {
     let cancelled = false;
     const fonts = Promise.all([400, 600, 700].map(w => document.fonts.load(`${w} 40px ${poppins.style.fontFamily}`, "Horário Sábado 8h30 Áá")));

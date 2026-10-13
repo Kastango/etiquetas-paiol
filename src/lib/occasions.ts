@@ -3,11 +3,11 @@
  * and hours. Natal follows the 2022 Christmas posts (red band, "especial" in yellow, the string of lights
  * from that story's PSD, scripts/extract-christmas-lights.py); the other dates follow its pattern.
  * White text on every band has at least 4.5:1 and the highlight at least 3:1 (occasions.test.ts). The
- * colour logo goes on the bands, as on the 2022 Christmas red; only the vinho band, which hides its vinho
- * roof, takes the white one.
+ * colour logo goes on the bands, as on the 2022 Christmas red, unless the band is so close to its vinho roof
+ * that the roof disappears (logoFor); then the white one.
  */
 
-export interface Palette { band: string; highlight: string; logo: "color" | "white" }
+export interface Palette { band: string; highlight: string }
 export interface HoursRow { days: string; hours: string }
 export interface HoursSample { title: string; rows: HoursRow[]; note: string }
 export interface Occasion {
@@ -30,8 +30,8 @@ export interface Occasion {
 }
 
 const VERDE = "#347265", VERDE_ESCURO = "#243C34", PALHA = "#F0CDA2", AMARELO = "#FECC55";
-const brand = (highlight = PALHA): Palette => ({ band: VERDE, highlight, logo: "color" });
-const civic: Palette[] = [{ band: VERDE_ESCURO, highlight: PALHA, logo: "color" }, brand()];
+const brand = (highlight = PALHA): Palette => ({ band: VERDE, highlight });
+const civic: Palette[] = [{ band: VERDE_ESCURO, highlight: PALHA }, brand()];
 
 const fixed = (month: number, day: number) => (year: number) => new Date(year, month - 1, day);
 /** Easter Sunday, by the anonymous Gregorian algorithm. */
@@ -57,39 +57,39 @@ export const PADRAO: Occasion = {
 
 export const OCCASIONS: Occasion[] = [
   { id: "ano-novo", name: "Ano Novo", holiday: true, date: fixed(1, 1), emoji: "✨", title: "Horário de Ano Novo",
-    palettes: [{ band: "#1F2A44", highlight: "#E8C468", logo: "color" }, { band: VERDE_ESCURO, highlight: "#E8C468", logo: "color" }],
+    palettes: [{ band: "#1F2A44", highlight: "#E8C468" }, { band: VERDE_ESCURO, highlight: "#E8C468" }],
     headlines: ["Oferta de | *Ano Novo*", "*Feliz* | Ano Novo"], around: [{ offset: -1, hours: "Das 8h30 às 12h00" }] },
   { id: "carnaval", name: "Carnaval", holiday: true, date: fromEaster(-47), emoji: "🎉", title: "Horário de Carnaval",
-    palettes: [{ band: "#6A2C91", highlight: "#FFD23F", logo: "color" }, brand("#FFD23F")],
+    palettes: [{ band: "#6A2C91", highlight: "#FFD23F" }, brand("#FFD23F")],
     headlines: ["Oferta de | *Carnaval*", "*Carnaval* | na Paiol"], around: [{ offset: -1, hours: "Das 8h30 às 12h00" }] },
   { id: "consumidor", name: "Dia do Consumidor", holiday: false, date: fixed(3, 15), emoji: "🛍️", greeting: "Semana do Consumidor na Paiol!",
-    palettes: [{ band: "#8D313B", highlight: PALHA, logo: "white" }, brand()],
+    palettes: [{ band: "#8D313B", highlight: PALHA }, brand()],
     headlines: ["Dia do | *Consumidor*", "Semana do | *Consumidor*"] },
   { id: "pascoa", name: "Páscoa", holiday: true, date: easter, emoji: "🐣", title: "Horário de Páscoa",
-    palettes: [{ band: "#5B3A29", highlight: "#F7C8D0", logo: "color" }, { band: "#7A4E9C", highlight: "#FFE3A3", logo: "color" }],
+    palettes: [{ band: "#5B3A29", highlight: "#F7C8D0" }, { band: "#7A4E9C", highlight: "#FFE3A3" }],
     headlines: ["Oferta de | *Páscoa*", "*Feliz* | Páscoa"], around: [{ offset: -2, hours: "Fechado" }, { offset: -1, hours: "Das 8h30 às 12h30" }] },
   { id: "tiradentes", name: "Tiradentes", holiday: true, date: fixed(4, 21), emoji: "🇧🇷", title: "Feriado de Tiradentes",
     palettes: civic, headlines: ["Oferta do | *feriado*"] },
   { id: "trabalho", name: "Dia do Trabalho", holiday: true, date: fixed(5, 1), emoji: "💚", title: "Feriado do Dia do Trabalho",
     palettes: civic, headlines: ["Oferta do | *feriado*"] },
   { id: "maes", name: "Dia das Mães", holiday: false, date: nth(5, 0, 2), emoji: "💐", greeting: "Feliz Dia das Mães!",
-    palettes: [{ band: "#A8325E", highlight: "#FFD6E0", logo: "color" }, brand("#FFD6E0")],
+    palettes: [{ band: "#A8325E", highlight: "#FFD6E0" }, brand("#FFD6E0")],
     headlines: ["Especial | *Dia das Mães*", "Para a | *mãe*"] },
   { id: "namorados", name: "Dia dos Namorados", holiday: false, date: fixed(6, 12), emoji: "❤️", greeting: "Feliz Dia dos Namorados!",
-    palettes: [{ band: "#B0243A", highlight: "#FFC2CC", logo: "color" }, brand("#FFC2CC")],
+    palettes: [{ band: "#B0243A", highlight: "#FFC2CC" }, brand("#FFC2CC")],
     headlines: ["Dia dos | *Namorados*", "Para quem | você *ama*"] },
   { id: "corpus-christi", name: "Corpus Christi", holiday: true, date: fromEaster(60), emoji: "💚", title: "Feriado de Corpus Christi",
     palettes: civic, headlines: ["Oferta do | *feriado*"] },
   { id: "junina", name: "Festa Junina", holiday: false, date: fixed(6, 24), emoji: "🌽", greeting: "Bom São João!",
-    palettes: [{ band: "#A63D1A", highlight: "#FFD23F", logo: "color" }, brand("#FFD23F")],
+    palettes: [{ band: "#A63D1A", highlight: "#FFD23F" }, brand("#FFD23F")],
     headlines: ["Arraiá da | *Paiol*", "Ofertas | *juninas*"] },
   { id: "pais", name: "Dia dos Pais", holiday: false, date: nth(8, 0, 2), emoji: "💚", greeting: "Feliz Dia dos Pais!",
-    palettes: [{ band: "#1F4E79", highlight: PALHA, logo: "color" }, brand()],
+    palettes: [{ band: "#1F4E79", highlight: PALHA }, brand()],
     headlines: ["Especial | *Dia dos Pais*", "Para o | *pai*"] },
   { id: "independencia", name: "Independência", holiday: true, date: fixed(9, 7), emoji: "🇧🇷", title: "Feriado da Independência",
     palettes: [brand(AMARELO), civic[0]], headlines: ["Oferta do | *feriado*"] },
   { id: "criancas", name: "Dia das Crianças", holiday: true, date: fixed(10, 12), emoji: "🎈", title: "Feriado de 12 de outubro",
-    palettes: [{ band: "#1565A8", highlight: "#FFD23F", logo: "color" }, brand("#FFD23F")],
+    palettes: [{ band: "#1565A8", highlight: "#FFD23F" }, brand("#FFD23F")],
     headlines: ["Dia das | *Crianças*", "Lanche | *das crianças*"] },
   { id: "finados", name: "Finados", holiday: true, date: fixed(11, 2), emoji: "💚", title: "Feriado de Finados",
     palettes: civic, headlines: ["Oferta do | *feriado*"] },
@@ -98,10 +98,10 @@ export const OCCASIONS: Occasion[] = [
   { id: "consciencia-negra", name: "Consciência Negra", holiday: true, date: fixed(11, 20), emoji: "💚", title: "Feriado de 20 de novembro",
     palettes: civic, headlines: ["Oferta do | *feriado*"] },
   { id: "black-friday", name: "Black Friday", holiday: false, date: year => addDays(nth(11, 4, 4)(year), 1), emoji: "🖤", greeting: "Black Friday na Paiol!",
-    palettes: [{ band: "#151515", highlight: AMARELO, logo: "color" }, { band: VERDE_ESCURO, highlight: AMARELO, logo: "color" }],
+    palettes: [{ band: "#151515", highlight: AMARELO }, { band: VERDE_ESCURO, highlight: AMARELO }],
     headlines: ["*Black* | Friday", "Black Friday | *Paiol*"] },
   { id: "natal", name: "Natal", holiday: true, date: fixed(12, 25), emoji: "🎄", title: "Horário de Natal",
-    palettes: [{ band: "#D9363C", highlight: AMARELO, logo: "color" }, brand(AMARELO)],
+    palettes: [{ band: "#D9363C", highlight: AMARELO }, brand(AMARELO)],
     headlines: ["Oferta | *especial* | de Natal", "*Feliz* | Natal"], around: [{ offset: -1, hours: "Das 8h30 às 12h00" }],
     lights: "/seasons/natal-luzes.png" },
 ];
@@ -112,6 +112,27 @@ export const palette = (id: string, index: number) => {
   return palettes[index] ?? palettes[0];
 };
 export const LOGOS = { color: "/brand/paiol-horizontal-reversed.png", white: "/brand/paiol-horizontal-white.png" };
+export type LogoChoice = keyof typeof LOGOS;
+
+function lab(hex: string) {
+  const linear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const [r, g, b] = [1, 3, 5].map(i => linear(parseInt(hex.slice(i, i + 2), 16) / 255));
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const x = f((0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047), y = f(0.2126 * r + 0.7152 * g + 0.0722 * b);
+  const z = f((0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883);
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+}
+/** Distance between two colours as the eye sees them (CIE76 ΔE). */
+export const colourDistance = (a: string, b: string) => {
+  const [p, q] = [lab(a), lab(b)];
+  return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+};
+const ROOF = "#8D313B";
+/**
+ * The colour logo, unless the band is within ΔE 20 of its vinho roof, which then blends into it (Dia do
+ * Consumidor's vinho, the pinks and reds of Mães and Namorados); the Christmas red, at 34, keeps it.
+ */
+export const logoFor = (band: string): LogoChoice => (colourDistance(band, ROOF) < 20 ? "white" : "color");
 
 const day = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
 /** The occasion's next date, today included. */

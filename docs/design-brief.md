@@ -75,7 +75,10 @@ domingo do mês). Cada data traz uma paleta sugerida e uma alternativa no verde 
 sugeridas (botões abaixo do campo) e o emoji da legenda. Branco sobre a faixa tem 4,5:1 e o destaque
 3:1 (`occasions.test.ts`). Nas datas, a faixa cresce para perto de 40% do post, como no Natal de
 2022, e a foto e o texto sobem (`dated` em cada formato de `offer.ts`); a tigela pode encostar na
-faixa. A logo é a colorida, como naquele Natal; a branca só na faixa vinho, onde o telhado some. Uma
+faixa. A logo é a colorida, como naquele Natal, salvo quando a faixa fica a menos de ΔE 20 do telhado
+vinho e o esconde (`logoFor`: Consumidor, Mães, Namorados), que leva a branca; o formulário deixa trocar
+(Logo: Colorida ou Branca), e trocar de tema ou de cores volta ao automático. O preço vai na cor da
+faixa (Cor do preço: Da data ou Vinho), que tem 3:1 de texto grande no branco e no palha. Uma
 chamada com quebras marcadas por | diminui até um quarto antes de ganhar uma linha a mais. Escolher uma data leva a validade para a
 véspera do feriado ou para o próprio dia, nunca um domingo (a loja fecha).
 
