@@ -16,8 +16,7 @@ import { fraunces, poppins } from "@/lib/fonts";
 import { OccasionPicker } from "@/components/occasion-picker";
 import { FORMATS, caption, drawOffer, inAWeek, isoDate, validityText, type Offer, type OfferAssets, type OfferFormat } from "@/lib/offer";
 import { LOGOS, PADRAO, occasion, offerUntil, palette, unmarked } from "@/lib/occasions";
-import { loadLabelTypes, typeOf } from "@/lib/label-types";
-import { UNITS, currency, loadProducts, type Product } from "@/lib/products";
+import { UNITS, currency } from "@/lib/products";
 import { cn, slug } from "@/lib/utils";
 import { PhotoPicker } from "./photo-picker";
 
@@ -81,10 +80,6 @@ function OfferEditor() {
   const [offer, setOffer] = useState<Offer>(loadDraft);
   const [format, setFormat] = useState<OfferFormat>(requestedFormat);
   const [photoSrc, setPhotoSrc] = useState(() => (matchPhoto(offer.name) ?? photos[0]).src);
-  const [products] = useState<Product[]>(() => {
-    const types = loadLabelTypes();
-    return loadProducts().filter(p => typeOf(p, types).price !== "none" && p.price > 0);
-  });
   const [assets, setAssets] = useState<OfferAssets | null>(null);
   const [busy, setBusy] = useState(false);
   const { copied, copy } = useCopy("Não foi possível copiar a legenda.");
@@ -122,15 +117,6 @@ function OfferEditor() {
     if (ctx && assets) drawOffer(ctx, offer, format, assets);
   }, [offer, format, assets]);
 
-  const pickProduct = (id: string) => {
-    const product = products.find(p => String(p.id) === id);
-    if (!product) return;
-    const name = product.name.replace(/\s*\|\s*/g, " ");
-    set({ name, price: product.price, unit: product.unit, oldPrice: 0 });
-    const match = matchPhoto(name);
-    if (match) setPhotoSrc(match.src);
-  };
-
   const render = (target: OfferFormat) => new Promise<Blob>((resolve, reject) => {
     const element = document.createElement("canvas");
     drawOffer(element.getContext("2d")!, offer, target, assets!);
@@ -156,19 +142,6 @@ function OfferEditor() {
     <div className="grid gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
       <form className="min-w-0 space-y-6" onSubmit={e => e.preventDefault()}>
         <OccasionPicker theme={offer.theme} palette={offer.palette} onTheme={pickTheme} onPalette={index => set({ palette: index })} />
-
-        {products.length > 0 && (
-          <Field id="product" label="Produto da lista de etiquetas" hint="Preenche nome, preço e unidade. Confira antes de publicar.">
-            <Select onValueChange={pickProduct}>
-              <SelectTrigger id="product"><SelectValue placeholder="Escolher produto…" /></SelectTrigger>
-              <SelectContent>
-                {products.map(p => (
-                  <SelectItem key={p.id} value={String(p.id)}>{p.name.replace(/\s*\|\s*/g, " ")} · {currency(p.price)}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        )}
 
         <fieldset className="space-y-4">
           <legend className="pb-2 font-semibold">Produto</legend>
