@@ -1,6 +1,6 @@
 """Rebuild the Paiol logo files and the brand kit from the original vector business card.
 
-uv run --with pymupdf --with pillow --with numpy --with fonttools scripts/extract-brand-assets.py --pdf /path/to/paiol-cartaoVisitas-CEmail.pdf
+uv run --with pymupdf --with pillow --with numpy --with fonttools --with skia-pathops scripts/extract-brand-assets.py --pdf /path/to/paiol-cartaoVisitas-CEmail.pdf
 
 The seals set their ring of text in scripts/sources/Nunito-Variable.ttf (OFL), the face of "Produtos naturais" on the card.
 Product photos come from scripts/extract-product-photos.py.
@@ -17,7 +17,10 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 import numpy as np
 import pymupdf
+import pathops
 from fontTools.pens.svgPathPen import SVGPathPen
+from fontTools.pens.transformPen import TransformPen
+from fontTools.svgLib.path import parse_path
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
 from PIL import Image
@@ -95,29 +98,37 @@ def mono_symbol(color, light, mid):
         g.append(e)
     return g
 
-def reversed_symbol(color, key):
+def outline(e, dy=0.0):
+    """A card path as a pathops Path in card coordinates, moved down by dy."""
+    a, b, c, d, tx, ty = (map(float, re.findall(r"-?[\d.]+(?:e-?\d+)?", e.get("transform"))) if e.get("transform")
+                          else (1, 0, 0, 1, 0, 0))
+    path = pathops.Path()
+    parse_path(e.get("d"), TransformPen(path.getPen(), (a, b, c, d, tx, ty + dy)))
+    return path
+
+def reversed_symbol(color):
     """The barn in solid white for dark backgrounds and photos, where tints would let the image through:
-    thin gaps outline the roof and the tower cone; door and window are cut out."""
+    thin gaps outline the roof and the tower cone; door and window are cut out. One plain path, worked out
+    with boolean operations: a mask would be drawn at the barn's small scale and look blurred in browsers,
+    and separate shapes leave hairline seams between façade and side."""
     facade, side, door, window, tower, roof, cone = symbol
-    mask = ET.Element(f"{{{ns}}}mask", {"id": f"barn-{key}", "maskUnits": "userSpaceOnUse",
-        "x": "0", "y": "0", "width": "321.118", "height": "207.732"})
-    def paint(e, fill, stroke=False):
-        e = copy.deepcopy(e)
-        e.set("fill", fill)
-        if stroke:
-            e.set("stroke", fill); e.set("stroke-width", "0.7"); e.set("stroke-linejoin", "round")
-        mask.append(e)
+    op = lambda one, two, kind: pathops.op(one, two, kind)
+    barn = pathops.Path()
     for e in symbol:
-        paint(e, "#fff")
-    # A black stroke then the shape again leaves a gap only outside the roof and the cone.
+        barn = op(barn, outline(e), pathops.PathOp.UNION)
+    # The gap: a 0.7 stroke round the roof and the cone, less the shape itself, so it falls only outside it.
     for e in (roof, cone):
-        paint(e, "#000", stroke=True)
-        paint(e, "#fff")
-    paint(door, "#000"); paint(window, "#000")
+        ring = outline(e)
+        ring.stroke(0.7, pathops.LineCap.BUTT_CAP, pathops.LineJoin.ROUND_JOIN, 4)
+        ring.convertConicsToQuads()  # round joins come out as conics, which boolean operations do not take
+        barn = op(barn, op(ring, outline(e), pathops.PathOp.DIFFERENCE), pathops.PathOp.DIFFERENCE)
+    # The door runs a little past the façade's slanted foot, so no sliver of wall is left under it.
+    for hole in (op(outline(door), outline(door, dy=1.5), pathops.PathOp.UNION), outline(window)):
+        barn = op(barn, hole, pathops.PathOp.DIFFERENCE)
+    pen = SVGPathPen(None)
+    barn.draw(pen)
     g = ET.Element(f"{{{ns}}}g")
-    g.append(mask)
-    ET.SubElement(g, f"{{{ns}}}rect", {"x": "140", "y": "45", "width": "40", "height": "40",
-        "fill": color, "mask": f"url(#barn-{key})"})
+    ET.SubElement(g, f"{{{ns}}}path", {"d": pen.getCommands(), "fill": color})
     return g
 
 def bounds(groups):
@@ -158,8 +169,8 @@ write("paiol-symbol", [group(symbol, "")])
 for name, color, light, mid in [("green", "#347265", "#b8cec9", "#85aaa3"), ("black", "#000000", "#a6a6a6", "#666666")]:
     write(f"paiol-symbol-{name}", [mono_symbol(color, light, mid)])
     write(f"paiol-horizontal-{name}", [mono_symbol(color, light, mid), group(wordmark, beside, color)])
-write("paiol-symbol-white", [reversed_symbol("#ffffff", "symbol")])
-write("paiol-horizontal-white", [reversed_symbol("#ffffff", "horizontal"), group(wordmark, beside, "#ffffff")])
+write("paiol-symbol-white", [reversed_symbol("#ffffff")])
+write("paiol-horizontal-white", [reversed_symbol("#ffffff"), group(wordmark, beside, "#ffffff")])
 
 # Seals: the name around the barn, for stickers, stamps and round avatars. Drawn on a 1000-unit square.
 # The text runs all the way round in caps of one height, with letter spacing that closes the circle; the centre
@@ -234,7 +245,7 @@ over_name = f"translate({(wx0 + wx1) / 2:.3f} {sy1 + lift:.3f}) scale(1.5) trans
 inks = [("color", "#347265", None, lambda: group(symbol, ""), "#347265"),
         ("disc", "#f0cda2", "#347265", lambda: group(symbol, ""), "#ffffff"),
         ("black", "#000000", None, lambda: mono_symbol("#000000", "#a6a6a6", "#666666"), "#000000"),
-        ("white", "#ffffff", None, lambda: reversed_symbol("#ffffff", "seal"), "#ffffff")]
+        ("white", "#ffffff", None, lambda: reversed_symbol("#ffffff"), "#ffffff")]
 for name, text, repeat, cap, gap, centre in [
         ("paiol-seal", "PAIOL PRODUTOS NATURAIS", 2, 52, 105, lambda barn, word: [barn]),
         ("paiol-seal-stacked", "PRODUTOS NATURAIS", 3, 50, 100, lambda barn, word: [placed(over_name, [barn]), group(wordmark, "", word)])]:

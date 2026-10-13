@@ -29,7 +29,7 @@ Os arquivos em `public/brand` e `public/products` s√£o gerados a partir do cart√
 visitas em PDF e dos PSDs de ofertas originais:
 
 ```bash
-uv run --with pymupdf --with pillow scripts/extract-brand-assets.py --pdf /caminho/paiol-cartaoVisitas-CEmail.pdf
+uv run --with pymupdf --with pillow --with numpy --with fonttools --with skia-pathops scripts/extract-brand-assets.py --pdf /caminho/paiol-cartaoVisitas-CEmail.pdf
 uv run --with psd-tools --with pillow --with scipy scripts/extract-product-photos.py --psd-dir /caminho/pasta-dos-psds
 ```
 
